@@ -94,7 +94,7 @@ namespace Bonobo.Git.Server.App_Start
 
             routes.MapRoute("Default",
                             "{controller}/{action}/{id}",
-                            new { controller = "Home", action = "Index", id = String.Empty });
+                            new { controller = "Repository", action = "Index", id = String.Empty });
 
             routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
 
