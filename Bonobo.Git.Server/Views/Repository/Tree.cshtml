@@ -45,7 +45,7 @@
 
         @if (!string.IsNullOrEmpty(Model.Readme))
         {
-            <div class="markdown">@Html.MarkdownToHtml(Model.Readme)</div>
+            <div class="markdown">@Html.MarkdownToHtml(Model.Readme, (Guid)ViewBag.ID, Model.Branch, Model.ReadmePath)</div>
         }
 
         <div class="pure-menu pure-menu-open pure-menu-horizontal repository-menu">

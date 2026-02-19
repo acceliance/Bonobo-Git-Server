@@ -35,11 +35,10 @@ namespace Bonobo.Git.Server.Test.MembershipTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void NonExistentRepositoryByGuidThrowsException()
         {
             var adminId = GetAdminId();
-            Assert.IsFalse(_service.HasPermission(adminId, Guid.NewGuid(), RepositoryAccessLevel.Pull));
+            Assert.Throws<InvalidOperationException>(() => _service.HasPermission(adminId, Guid.NewGuid(), RepositoryAccessLevel.Pull));
         }
 
         [TestMethod]
@@ -152,10 +151,9 @@ namespace Bonobo.Git.Server.Test.MembershipTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void UnknownRepositoryByGuidThrowsException()
         {
-            Assert.IsFalse(_service.HasPermission(Guid.Empty, Guid.NewGuid(), RepositoryAccessLevel.Pull));
+            Assert.Throws<InvalidOperationException>(() => _service.HasPermission(Guid.Empty, Guid.NewGuid(), RepositoryAccessLevel.Pull));
         }
 
         [TestMethod]

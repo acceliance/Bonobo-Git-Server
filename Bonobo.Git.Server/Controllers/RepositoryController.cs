@@ -268,11 +268,13 @@ namespace Bonobo.Git.Server.Controllers
 
                 var readme = files.FirstOrDefault(x => x.Name.Equals("readme.md", StringComparison.OrdinalIgnoreCase));
                 string readmeTxt = string.Empty;
+                string readmePath = string.Empty;
                 if (readme != null)
                 {
                     string refereceName;
                     var blob = browser.BrowseBlob(name, readme.Path, out refereceName);
                     readmeTxt = blob.Text;
+                    readmePath = readme.Path;
                 }
                 var model = new RepositoryTreeModel
                 {
@@ -280,6 +282,7 @@ namespace Bonobo.Git.Server.Controllers
                     Branch = name ?? referenceName,
                     Path = path,
                     Readme = readmeTxt,
+                    ReadmePath = readmePath,
                     Logo = new RepositoryLogoDetailModel(repo.Logo),
                     Files = files.OrderByDescending(i => i.IsTree).ThenBy(i => i.Name)
                 };
