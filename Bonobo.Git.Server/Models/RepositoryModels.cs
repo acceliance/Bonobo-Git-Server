@@ -198,6 +198,7 @@ namespace Bonobo.Git.Server.Models
         public string Branch { get; set; }
         public string Path { get; set; }
         public string Readme { get; set; }
+        public string ReadmePath { get; set; }
         public RepositoryLogoDetailModel Logo { get; set; }
         public IEnumerable<RepositoryTreeDetailModel> Files { get; set; }
     }

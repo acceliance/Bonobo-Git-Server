@@ -112,13 +112,12 @@ namespace Bonobo.Git.Server.Test.MembershipTests.EFTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void TestRoleCannotBeDeletedWhilePopulatedIfForbidden()
         {
             var userId = AddUserFred();
             _provider.CreateRole("Programmer");
             _provider.AddUserToRoles(userId, new[] { "Programmer" });
-            _provider.DeleteRole("Programmer", true);
+            Assert.Throws<InvalidOperationException>(() => _provider.DeleteRole("Programmer", true));
         }
 
         [TestMethod]

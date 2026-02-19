@@ -105,13 +105,12 @@ namespace Bonobo.Git.Server.Test.MembershipTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void NonExistentRepoIdThrowsException()
         {
             var newRepo1 = MakeRepo("Repo1");
             _repo.Create(newRepo1);
 
-            _repo.GetRepository(Guid.NewGuid());
+            Assert.Throws<InvalidOperationException>(() => _repo.GetRepository(Guid.NewGuid()));
         }
 
         [TestMethod]

@@ -88,10 +88,9 @@ namespace Bonobo.Git.Server.Test.Unit
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
         public void NonByteCharacterInput()
         {
-            PathEncoder.Decode("\u0394");
+            Assert.Throws<FormatException>(() => PathEncoder.Decode("\u0394"));
         }
 
         [TestMethod]
@@ -101,24 +100,21 @@ namespace Bonobo.Git.Server.Test.Unit
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
         public void MissingOneNibble()
         {
-            PathEncoder.Decode("~0");
+            Assert.Throws<FormatException>(() => PathEncoder.Decode("~0"));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
         public void MissingBothNibbles()
         {
-            PathEncoder.Decode("~");
+            Assert.Throws<FormatException>(() => PathEncoder.Decode("~"));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException))]
         public void BadNibbleValues()
         {
-            PathEncoder.Decode("~no");
+            Assert.Throws<FormatException>(() => PathEncoder.Decode("~no"));
         }
 
         private static void AssertAllRequirements(string input)
