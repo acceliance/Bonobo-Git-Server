@@ -48,6 +48,7 @@
                     }
                     else
                     {
+                        <li><a href="@Url.Action("Index", "Repository")" class="repository"><i class="fa fa-hdd-o"></i> @Resources.Layout_Repositories</a></li>
                         <li><a href="@Url.Action("LogOn", "Home", new { id = User.Id() })"><i class="fa fa-sign-in"></i> @Resources.Layout_LogOn</a></li>
                         if (UserConfiguration.Current.AllowAnonymousRegistration)
                         {
