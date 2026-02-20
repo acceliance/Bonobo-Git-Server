@@ -25,7 +25,7 @@
         }
         else if (Model.IsText && Model.IsMarkdown)
         {
-            <div class="markdown">@Html.MarkdownToHtml(Model.Text)</div>
+            <div class="markdown">@Html.MarkdownToHtml(Model.Text, (Guid)ViewBag.ID, Model.TreeName, Model.Path)</div>
         }
         else if (Model.IsText)
         {
