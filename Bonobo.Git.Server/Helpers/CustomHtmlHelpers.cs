@@ -62,6 +62,29 @@ namespace Bonobo.Git.Server.Helpers
                 return prefix + rawUrl + suffix;
             }, RegexOptions.IgnoreCase);
 
+            // Handle absolute repo-root-relative paths (e.g. /readme/image.png).
+            // These start with a single "/" and were skipped by the regex above.
+            // Protocol-relative URLs (//) are left untouched.
+            html = Regex.Replace(html, @"(<img\b[^>]*\ssrc="")(/(?!/)[^""]+)("")", match =>
+            {
+                var prefix    = match.Groups[1].Value;
+                var src       = match.Groups[2].Value; // e.g. "/readme/image.png"
+                var suffix    = match.Groups[3].Value;
+
+                // Strip the leading "/" to obtain the in-repo path from the root.
+                var imagePath = src.TrimStart('/');
+
+                var rawUrl = urlHelper.Action("Raw", "Repository", new
+                {
+                    id          = repoId,
+                    encodedName = PathEncoder.Encode(branch),
+                    encodedPath = PathEncoder.Encode(imagePath, allowSlash: true),
+                    display     = true
+                });
+
+                return prefix + rawUrl + suffix;
+            }, RegexOptions.IgnoreCase);
+
             return MvcHtmlString.Create(html);
         }
 
