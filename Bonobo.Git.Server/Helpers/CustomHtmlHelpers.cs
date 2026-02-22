@@ -51,7 +51,7 @@ namespace Bonobo.Git.Server.Helpers
                 // Build the full in-repo path relative to the README's directory
                 var imagePath = readmeDir + src;
 
-                var rawUrl = urlHelper.Action("Raw", "Repository", new
+                var rawUrl = urlHelper.RouteUrl("RepositoryRaw", new
                 {
                     id          = repoId,
                     encodedName = PathEncoder.Encode(branch),
@@ -74,7 +74,7 @@ namespace Bonobo.Git.Server.Helpers
                 // Strip the leading "/" to obtain the in-repo path from the root.
                 var imagePath = src.TrimStart('/');
 
-                var rawUrl = urlHelper.Action("Raw", "Repository", new
+                var rawUrl = urlHelper.RouteUrl("RepositoryRaw", new
                 {
                     id          = repoId,
                     encodedName = PathEncoder.Encode(branch),
