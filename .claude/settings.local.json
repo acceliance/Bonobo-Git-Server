@@ -5,7 +5,20 @@
       "Bash(Select-String -Path \"C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj\" -Pattern \"LangVersion\" -Context 1,1)",
       "Bash(dir:*)",
       "mcp__filesystem__search_files",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(msbuild:*)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" \"C:/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server/Bonobo.Git.Server.csproj\" /t:Build /p:Configuration=Debug /nologo /v:minimal)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"C:/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server/Bonobo.Git.Server.csproj\" /t:Build /p:Configuration=Debug /nologo /v:minimal)",
+      "Bash(cmd.exe /c '\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"\" \"\"C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj\"\" /t:Build /p:Configuration=Debug /nologo /v:minimal 2>&1')",
+      "Bash(cmd.exe /c \"\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"\" \"\"C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj\"\" /t:Build /p:Configuration=Debug /nologo /v:minimal\")",
+      "Bash(cmd /c:*)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" \"/c/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server/Bonobo.Git.Server.csproj\" /t:Build /p:Configuration=Debug /nologo /v:minimal)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\":*)",
+      "Bash(ls:*)",
+      "Bash(powershell.exe -NoProfile -Command \"& ''C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe'' ''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj'' /t:Build /p:Configuration=Debug /nologo /v:minimal 2>&1 | Out-File -FilePath ''C:\\\\Users\\\\joset\\\\msbuild_output.txt'' -Encoding utf8; Get-Content ''C:\\\\Users\\\\joset\\\\msbuild_output.txt''\")",
+      "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"C:/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server.sln\" /p:Configuration=Debug /nologo /v:minimal)",
+      "Bash(echo:*)",
+      "Bash(powershell.exe -NoProfile -Command \"& ''C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe'' ''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server.sln'' /p:Configuration=Debug /nologo /v:minimal 2>&1 | Tee-Object -FilePath ''C:\\\\Users\\\\joset\\\\AppData\\\\Local\\\\Temp\\\\msbuild_output.txt''\")"
     ]
   }
 }
