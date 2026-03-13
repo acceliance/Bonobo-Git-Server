@@ -1,7 +1,7 @@
 html, button, input, select, textarea, .pure-g [class *= "pure-u"], .pure-g-r [class *= "pure-u"] { font-family: OpenSans, sans-serif; }
 
 html { font-size: 16px; color: #333; text-rendering: optimizeLegibility; }
-html, body { margin: 0; padding: 0; height: 100%; min-width: 1100px;}
+html, body { margin: 0; padding: 0; height: 100%; }
 
 h1, h2, h3, h4, h5, h6 { font-weight: 300; }
 a { color: #4183c4; text-decoration: none; }
@@ -58,7 +58,7 @@ table.repositories button.copy-to-clip-button { margin-left: 0px; border-radius:
 
 .main { min-height: 100%; position: relative; }
 
-.content { width: 980px; margin: 0 auto; padding-bottom: 50px; }
+.content { max-width: 980px; width: 100%; margin: 0 auto; padding-bottom: 50px; box-sizing: border-box; }
 .content h1 { position:relative; }
 .content h1 img {   position: absolute; left: -54px; top: 6px; }
 
@@ -185,3 +185,159 @@ h2.group .toggle.on:after { content: "\f055"; }
 img.repo-logo { width:36px; height: auto; image-rendering: -moz-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; -ms-interpolation-mode: nearest-neighbor; }
 
 .copy-to-clip-button {font-size: 12px; padding: 4px; }
+
+/* =========================================
+   Responsive / Mobile Styles
+   ========================================= */
+
+/* Hamburger toggle button — hidden on desktop */
+.nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.4em;
+    cursor: pointer;
+    padding: 0.4em 0.8em;
+    float: right;
+    line-height: 1;
+    margin-top: 0.2em;
+}
+.nav-toggle:focus { outline: none; }
+
+@media (max-width: 991px), (pointer: coarse) {
+
+    /* ── Global overflow guard ─────────────────────────────────── */
+    html, body { overflow-x: hidden; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* ── Hamburger: absolutely positioned so it never sits inline
+         next to nav items regardless of Pure CSS float/inline-block ── */
+    .nav-toggle {
+        display: block;
+        position: absolute;
+        right: 0.5em;
+        top: 0.5em;
+        float: none;   /* cancel the global float:right */
+        margin-top: 0;
+    }
+
+    /* Nav bar wrapper needs relative + min-height for the absolute button */
+    .navigation.pure-menu-horizontal {
+        position: relative;
+        min-height: 2.8em;
+    }
+
+    /* Collapsed UL: height:0 + overflow:hidden (both !important)
+       avoids any conflict with Pure CSS display / visibility rules   */
+    .navigation.pure-menu-horizontal > ul {
+        height: 0 !important;
+        overflow: hidden !important;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+        clear: both;
+    }
+    /* Expanded UL when hamburger is toggled */
+    .navigation.pure-menu-horizontal.active > ul {
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+        padding-bottom: 0.5em;
+    }
+
+    .navigation.pure-menu-horizontal li {
+        display: block;
+        float: none;
+    }
+    .navigation ul a { padding: 10px 1em; display: block; }
+    .navigation ul { padding-right: 0; }
+
+    /* Repository jump dropdown inside nav */
+    .navigation select.repositories {
+        width: calc(100% - 2em);
+        margin: 0.4em 1em !important;
+        display: block;
+        box-sizing: border-box;
+    }
+
+    /* Content padding on small screens */
+    .content { padding: 0 0.75em 50px; }
+    .content h1 img { display: none; }
+
+    /* Pure CSS grid columns become full-width on mobile */
+    .pure-u-1-2, .pure-u-1-3, .pure-u-2-3,
+    .pure-u-1-4, .pure-u-3-4,
+    .pure-u-1-5, .pure-u-2-5, .pure-u-3-5, .pure-u-4-5 { width: 100% !important; }
+
+    /* Action button row */
+    .add { margin-top: 0.5em; text-align: left; }
+
+    /* Make all tables horizontally scrollable */
+    .pure-table, table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Form inputs: full width on mobile */
+    textarea.medium, input.medium,
+    textarea.large, input.large {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        box-sizing: border-box;
+    }
+    .pure-form-aligned .pure-control-group label {
+        width: 100%;
+        display: block;
+        text-align: left;
+        margin-bottom: 0.25em;
+    }
+    .pure-form-aligned input, .pure-form-aligned textarea,
+    .pure-form-aligned select { margin: 0; }
+    .pure-form-aligned .pure-controls { margin-left: 0; }
+    .pure-form .checkboxlist ul { width: 100%; max-width: 100%; }
+
+    /* Commit heading */
+    .commit h2 { width: 100%; white-space: normal; }
+
+    /* Blame table */
+    .blame { overflow-x: auto; }
+    #blame_table td.commit .commit { width: auto; min-width: 180px; }
+
+    /* Breadcrumbs */
+    .breadcrumbs { overflow-x: auto; white-space: nowrap; }
+
+    /* Blob / diff */
+    .blob { overflow-x: auto; }
+
+    /* Repository menu tabs: allow wrapping */
+    .repository-menu.pure-menu-horizontal li { display: inline-block; float: none; }
+
+    /* Content already has padding-bottom: 50px matching footer height, so
+       the original absolute-positioned sticky footer keeps working on mobile */
+
+    /* ── Images ───────────────────────────────────────────────── */
+    img { max-width: 100%; height: auto; }
+
+    /* ── Code / pre blocks ────────────────────────────────────── */
+    /* word-wrap:normal + white-space:pre make long lines escape;
+       keep pre-formatting visually but scroll inside the block   */
+    pre { max-width: 100%; overflow-x: auto; }
+    .blob pre, .diff pre { word-wrap: normal; white-space: pre; }
+
+    /* ── Tree-view fixed column widths ────────────────────────── */
+    .Tree #files .path { width: auto; }
+    .Tree #files .date { width: auto; }
+
+    /* ── Branch / tag nav: stop floats from escaping ──────────── */
+    nav.branches ul li { float: none; display: inline-block; }
+
+    /* ── Form inputs: never exceed viewport ───────────────────── */
+    .pure-form input[type="text"],
+    .pure-form input[type="password"],
+    .pure-form input[type="email"],
+    .pure-form input[type="url"],
+    .pure-form input[type="search"],
+    .pure-form input[type="number"],
+    .pure-form select,
+    .pure-form textarea { max-width: 100%; }
+}
