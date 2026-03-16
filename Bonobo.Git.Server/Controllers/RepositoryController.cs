@@ -335,6 +335,14 @@ namespace Bonobo.Git.Server.Controllers
 
                 if (!display)
                 {
+                    if (model.IsImage)
+                    {
+                        // Serve images with their real MIME type so browsers can render
+                        // them in <img> tags.  PNG/JPG/GIF work with octet-stream via
+                        // magic-byte detection, but SVG is XML text — it must be served
+                        // as image/svg+xml or browsers will not render it as a graphic.
+                        return File(model.Data, MimeTypeMap.GetMimeType(Path.GetExtension(model.Name.ToLower())), model.Name);
+                    }
                     return File(model.Data, "application/octet-stream", model.Name);
                 }
                 if (model.IsText)

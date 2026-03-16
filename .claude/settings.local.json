@@ -18,7 +18,11 @@
       "Bash(powershell.exe -NoProfile -Command \"& ''C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe'' ''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj'' /t:Build /p:Configuration=Debug /nologo /v:minimal 2>&1 | Out-File -FilePath ''C:\\\\Users\\\\joset\\\\msbuild_output.txt'' -Encoding utf8; Get-Content ''C:\\\\Users\\\\joset\\\\msbuild_output.txt''\")",
       "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"C:/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server.sln\" /p:Configuration=Debug /nologo /v:minimal)",
       "Bash(echo:*)",
-      "Bash(powershell.exe -NoProfile -Command \"& ''C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe'' ''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server.sln'' /p:Configuration=Debug /nologo /v:minimal 2>&1 | Tee-Object -FilePath ''C:\\\\Users\\\\joset\\\\AppData\\\\Local\\\\Temp\\\\msbuild_output.txt''\")"
+      "Bash(powershell.exe -NoProfile -Command \"& ''C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe'' ''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server.sln'' /p:Configuration=Debug /nologo /v:minimal 2>&1 | Tee-Object -FilePath ''C:\\\\Users\\\\joset\\\\AppData\\\\Local\\\\Temp\\\\msbuild_output.txt''\")",
+      "Bash(grep -r \"\\\\.image\\\\|fileImage\" /c/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server/Content --include=*.css --include=*.less)",
+      "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\bin\\\\System.Data.SQLite.dll''\\).Version\")",
+      "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\packages\\\\System.Data.SQLite.2.0.2\\\\lib\\\\net471\\\\System.Data.SQLite.dll''\\).Version\")",
+      "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\bin\\\\System.Data.SQLite.EF6.dll''\\).Version\")"
     ]
   }
 }

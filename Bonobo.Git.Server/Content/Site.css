@@ -124,6 +124,7 @@ Tags .tag a { background-color: rgba(148, 190, 214, 1); border-radius: 5px; colo
 .blob .controls a:hover { color: #4183c4; text-decoration: none;}
 .blob pre, .diff pre { font-size: 0.8em; word-wrap:normal; overflow: auto; margin: 0; padding: 0;}
 .blob pre code, .diff pre code { white-space: pre; background: transparent; margin: 0.5em;}
+.blob img, .markdown img { max-width: 100%; height: auto; }
 .blob img {margin: 1em auto; display: block;}
 
 .markdown { padding: 1em; }
