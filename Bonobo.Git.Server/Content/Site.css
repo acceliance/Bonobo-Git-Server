@@ -128,6 +128,7 @@ Tags .tag a { background-color: rgba(148, 190, 214, 1); border-radius: 5px; colo
 .blob img {margin: 1em auto; display: block;}
 
 .markdown { padding: 1em; }
+.markdown blockquote { background: #f6f6f6; border-left: 4px solid #ddd; margin: 0.5em 0; padding: 0.5em 1em; }
 
 .blame { overflow-x: auto }
 #blame_table { margin: 0 0 -1px 0; }
