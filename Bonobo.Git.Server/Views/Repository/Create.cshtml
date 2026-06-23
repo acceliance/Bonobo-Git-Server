@@ -77,6 +77,14 @@
             </div>
 
             <div class="pure-control-group checkboxlist">
+                @Html.LabelFor(m => m.Readers)
+                <span>
+                    @Html.CheckBoxListFor(m => m.PostedSelectedReaders, mm => mm.AllReaders, mm => mm.Id, mm => mm.DisplayName, mm => mm.Readers, Position.Vertical)
+                </span>
+                <i class="fa fa-info-circle" title="@Resources.Repository_ReadersHint"></i>
+            </div>
+
+            <div class="pure-control-group checkboxlist">
                 @Html.LabelFor(m => m.Administrators)
                 <span>
                     @Html.CheckBoxListFor(m => m.PostedSelectedAdministrators, mm => mm.AllAdministrators, mm => mm.Id, mm => mm.DisplayName, mm => mm.Administrators, Position.Vertical)

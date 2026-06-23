@@ -23,6 +23,7 @@ namespace Bonobo.Git.Server.Data.Update
                         new Sqlite.AddGuidColumn(),
                         new Sqlite.AddRepoPushColumn(),
                         new Sqlite.AddRepoLinksColumn(),
+                        new Sqlite.AddRepoReaders(),
                         new Sqlite.InsertDefaultData()
                     };
                 case "SqlConnection":
@@ -36,6 +37,7 @@ namespace Bonobo.Git.Server.Data.Update
                         new SqlServer.AddGuidColumn(),
                         new SqlServer.AddRepoPushColumn(),
                         new SqlServer.AddRepoLinksColumn(),
+                        new SqlServer.AddRepoReaders(),
                         new SqlServer.InsertDefaultData()
                     };
                 default:

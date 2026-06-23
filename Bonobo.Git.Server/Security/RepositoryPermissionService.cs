@@ -108,9 +108,16 @@ namespace Bonobo.Git.Server.Security
             switch (requiredLevel)
             {
                 case RepositoryAccessLevel.Push:
-                case RepositoryAccessLevel.Pull:
                     return userIsAnAdministrator ||
                         UserIsARepoUser(userId, repository) ||
+                        UserIsATeamMember(userTeams, repository);
+
+                case RepositoryAccessLevel.Pull:
+                    // Readers are granted read-only (pull) access in addition to the
+                    // contributors/admins/teams who can both pull and push
+                    return userIsAnAdministrator ||
+                        UserIsARepoUser(userId, repository) ||
+                        UserIsARepoReader(userId, repository) ||
                         UserIsATeamMember(userTeams, repository);
 
                 case RepositoryAccessLevel.Administer:
@@ -123,6 +130,11 @@ namespace Bonobo.Git.Server.Security
         private static bool UserIsARepoUser(Guid userId, RepositoryModel repository)
         {
             return repository.Users.Any(x => x.Id == userId);
+        }
+
+        private static bool UserIsARepoReader(Guid userId, RepositoryModel repository)
+        {
+            return repository.Readers.Any(x => x.Id == userId);
         }
 
         private static bool UserIsATeamMember(IList<TeamModel> userTeams, RepositoryModel repository)

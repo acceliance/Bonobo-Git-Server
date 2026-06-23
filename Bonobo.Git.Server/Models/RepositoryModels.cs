@@ -27,6 +27,7 @@ namespace Bonobo.Git.Server.Models
         public bool AnonymousAccess { get; set; }
         public RepositoryPushMode AllowAnonymousPush { get; set; }
         public UserModel[] Users { get; set; }
+        public UserModel[] Readers { get; set; }
         public UserModel[] Administrators { get; set; }
         public TeamModel[] Teams { get; set; }
         public bool AuditPushUser { get; set; }
@@ -74,6 +75,11 @@ namespace Bonobo.Git.Server.Models
                 Users = new UserModel[0];
             }
 
+            if (Readers == null)
+            {
+                Readers = new UserModel[0];
+            }
+
             if (Teams == null)
             {
                 Teams = new TeamModel[0];
@@ -116,6 +122,11 @@ namespace Bonobo.Git.Server.Models
         public UserModel[] Users { get; set; }
         public Guid[] PostedSelectedUsers { get; set; }
         public UserModel[] AllUsers { get; set; }
+
+        [Display(ResourceType = typeof(Resources), Name = "Repository_Detail_Readers")]
+        public UserModel[] Readers { get; set; }
+        public Guid[] PostedSelectedReaders { get; set; }
+        public UserModel[] AllReaders { get; set; }
 
         [Display(ResourceType = typeof(Resources), Name = "Repository_Detail_Teams")]
         public TeamModel[] Teams { get; set; }

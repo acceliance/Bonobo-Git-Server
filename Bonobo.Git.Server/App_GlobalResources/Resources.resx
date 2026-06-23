@@ -421,6 +421,9 @@
   <data name="Repository_Detail_Users" xml:space="preserve">
     <value>Contributors</value>
   </data>
+  <data name="Repository_Detail_Readers" xml:space="preserve">
+    <value>Readers</value>
+  </data>
   <data name="Repository_Detail_Yes" xml:space="preserve">
     <value>Yes</value>
   </data>
@@ -615,6 +618,9 @@
   </data>
   <data name="Repository_UsersHint" xml:space="preserve">
     <value>Users have access to the repository. They can clone, push or pull and view repository metadata.</value>
+  </data>
+  <data name="Repository_ReadersHint" xml:space="preserve">
+    <value>Readers have read-only access to the repository. They can clone or pull and view repository metadata, but cannot push.</value>
   </data>
   <data name="Validation_FileName" xml:space="preserve">
     <value>"{0}" contains characters that can't be in a file or directory name.</value>

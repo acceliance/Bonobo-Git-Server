@@ -26,6 +26,7 @@ namespace Bonobo.Git.Server.Data
                     Description = repo.Description,
                     AnonymousAccess = repo.Anonymous,
                     Users = repo.Users,
+                    Readers = repo.Readers,
                     Teams = repo.Teams,
                     Administrators = repo.Administrators,
                     AuditPushUser = repo.AuditPushUser,
@@ -41,6 +42,7 @@ namespace Bonobo.Git.Server.Data
                     Description = repo.Description,
                     AnonymousAccess = repo.AnonymousAccess,
                     Users = repo.Users.Select(user => user.ToModel()).ToArray(),
+                    Readers = repo.Readers.Select(user => user.ToModel()).ToArray(),
                     Teams = repo.Teams.Select(TeamToTeamModel).ToArray(),
                     Administrators = repo.Administrators.Select(user => user.ToModel()).ToArray(),
                     AuditPushUser = repo.AuditPushUser,
@@ -86,6 +88,7 @@ namespace Bonobo.Git.Server.Data
                 {
                     repo.Administrators.Clear();
                     repo.Users.Clear();
+                    repo.Readers.Clear();
                     repo.Teams.Clear();
                     db.Repositories.Remove(repo);
                     db.SaveChanges();
@@ -123,7 +126,7 @@ namespace Bonobo.Git.Server.Data
                     LinksRegex = model.LinksRegex
                 };
                 database.Repositories.Add(repository);
-                AddMembers(model.Users.Select(x => x.Id), model.Administrators.Select(x => x.Id), model.Teams.Select(x => x.Id), repository, database);
+                AddMembers(model.Users.Select(x => x.Id), model.Readers.Select(x => x.Id), model.Administrators.Select(x => x.Id), model.Teams.Select(x => x.Id), repository, database);
                 try
                 {
                     database.SaveChanges();
@@ -170,10 +173,11 @@ namespace Bonobo.Git.Server.Data
                         repo.Logo = null;
 
                     repo.Users.Clear();
+                    repo.Readers.Clear();
                     repo.Teams.Clear();
                     repo.Administrators.Clear();
 
-                    AddMembers(model.Users.Select(x => x.Id), model.Administrators.Select(x => x.Id), model.Teams.Select(x => x.Id), repo, db);
+                    AddMembers(model.Users.Select(x => x.Id), model.Readers.Select(x => x.Id), model.Administrators.Select(x => x.Id), model.Teams.Select(x => x.Id), repo, db);
 
                     db.SaveChanges();
                 }
@@ -206,6 +210,7 @@ namespace Bonobo.Git.Server.Data
                 Description = item.Description,
                 AnonymousAccess = item.Anonymous,
                 Users = item.Users.Select(user => user.ToModel()).ToArray(),
+                Readers = item.Readers.Select(user => user.ToModel()).ToArray(),
                 Teams = item.Teams.Select(TeamToTeamModel).ToArray(),
                 Administrators = item.Administrators.Select(user => user.ToModel()).ToArray(),
                 AuditPushUser = item.AuditPushUser,
@@ -218,7 +223,7 @@ namespace Bonobo.Git.Server.Data
             };
         }
 
-        private void AddMembers(IEnumerable<Guid> users, IEnumerable<Guid> admins, IEnumerable<Guid> teams, Repository repo, BonoboGitServerContext database)
+        private void AddMembers(IEnumerable<Guid> users, IEnumerable<Guid> readers, IEnumerable<Guid> admins, IEnumerable<Guid> teams, Repository repo, BonoboGitServerContext database)
         {
             if (admins != null)
             {
@@ -235,6 +240,15 @@ namespace Bonobo.Git.Server.Data
                 foreach (var item in permittedUsers)
                 {
                     repo.Users.Add(item);
+                }
+            }
+
+            if (readers != null)
+            {
+                var permittedReaders = database.Users.Where(i => readers.Contains(i.Id));
+                foreach (var item in permittedReaders)
+                {
+                    repo.Readers.Add(item);
                 }
             }
 
