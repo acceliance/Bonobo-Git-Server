@@ -22,7 +22,16 @@
       "Bash(grep -r \"\\\\.image\\\\|fileImage\" /c/Users/joset/source/repos/Bonobo-Git-Server/Bonobo.Git.Server/Content --include=*.css --include=*.less)",
       "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\bin\\\\System.Data.SQLite.dll''\\).Version\")",
       "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\packages\\\\System.Data.SQLite.2.0.2\\\\lib\\\\net471\\\\System.Data.SQLite.dll''\\).Version\")",
-      "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\bin\\\\System.Data.SQLite.EF6.dll''\\).Version\")"
+      "Bash(powershell -Command \"[System.Reflection.AssemblyName]::GetAssemblyName\\(''C:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\bin\\\\System.Data.SQLite.EF6.dll''\\).Version\")",
+      "Bash(grep \"\\\\.cs$\")",
+      "PowerShell($msb = \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"; & $msb \"c:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj\" /t:Build /p:Configuration=Debug /v:minimal /nologo /clp:ErrorsOnly 2>&1 | Select-Object -Last 40)",
+      "PowerShell($msb = \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"; & $msb \"c:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server\\\\Bonobo.Git.Server.csproj\" /t:Build /p:Configuration=Debug /v:minimal /nologo 2>&1 | Select-Object -Last 8; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell($msb = \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\"; & $msb \"c:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server.Test\\\\Bonobo.Git.Server.Test.csproj\" /t:Build /p:Configuration=Debug /v:minimal /nologo 2>&1 | Select-Object -Last 12; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell($vstest = \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\Common7\\\\IDE\\\\CommonExtensions\\\\Microsoft\\\\TestWindow\\\\vstest.console.exe\"; $dll = \"c:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server.Test\\\\bin\\\\Debug\\\\Bonobo.Git.Server.Test.dll\"; & $vstest $dll /TestCaseFilter:\"FullyQualifiedName~Reader|FullyQualifiedName~DatabaseUpdateTests\" 2>&1 | Select-Object -Last 40)",
+      "PowerShell($vstest = \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\18\\\\Community\\\\Common7\\\\IDE\\\\CommonExtensions\\\\Microsoft\\\\TestWindow\\\\vstest.console.exe\"; $dll = \"c:\\\\Users\\\\joset\\\\source\\\\repos\\\\Bonobo-Git-Server\\\\Bonobo.Git.Server.Test\\\\bin\\\\Debug\\\\Bonobo.Git.Server.Test.dll\"; & $vstest $dll /TestCaseFilter:\"FullyQualifiedName~RepoMemberUserIsAuthorised\" 2>&1 | Select-Object -Last 20)",
+      "Bash(grep -iE \"Use64BitIISExpress|IISExpress\" Bonobo.Git.Server/*.user)",
+      "Bash(which nuget *)",
+      "Bash(ls .nuget/nuget.exe)"
     ]
   }
 }

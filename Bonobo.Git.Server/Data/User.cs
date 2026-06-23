@@ -8,6 +8,7 @@ namespace Bonobo.Git.Server.Data
     {
         private ICollection<Repository> _administratedRepositories;
         private ICollection<Repository> _repositories;
+        private ICollection<Repository> _readableRepositories;
         private ICollection<Role> _roles;
         private ICollection<Team> _teams;
 
@@ -40,6 +41,18 @@ namespace Bonobo.Git.Server.Data
             set
             {
                 _repositories = value;
+            }
+        }
+
+        public virtual ICollection<Repository> ReadableRepositories
+        {
+            get
+            {
+                return _readableRepositories ?? (_readableRepositories = new List<Repository>());
+            }
+            set
+            {
+                _readableRepositories = value;
             }
         }
 

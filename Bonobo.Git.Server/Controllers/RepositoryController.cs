@@ -644,10 +644,15 @@ namespace Bonobo.Git.Server.Controllers
             model = model.Id != Guid.Empty ? ConvertRepositoryModel(RepositoryRepository.GetRepository(model.Id), User) : model;
             model.AllAdministrators = MembershipService.GetAllUsers().ToArray();
             model.AllUsers = MembershipService.GetAllUsers().ToArray();
+            model.AllReaders = MembershipService.GetAllUsers().ToArray();
             model.AllTeams = TeamRepository.GetAllTeams().ToArray();
             if (model.PostedSelectedUsers != null && model.PostedSelectedUsers.Any())
             {
                 model.Users = model.PostedSelectedUsers.Select(x => MembershipService.GetUserModel(x)).ToArray();
+            }
+            if (model.PostedSelectedReaders != null && model.PostedSelectedReaders.Any())
+            {
+                model.Readers = model.PostedSelectedReaders.Select(x => MembershipService.GetUserModel(x)).ToArray();
             }
             if (model.PostedSelectedTeams != null && model.PostedSelectedTeams.Any())
             {
@@ -659,6 +664,7 @@ namespace Bonobo.Git.Server.Controllers
             }
             model.PostedSelectedAdministrators = new Guid[0];
             model.PostedSelectedUsers = new Guid[0];
+            model.PostedSelectedReaders = new Guid[0];
             model.PostedSelectedTeams = new Guid[0];
         }
 
@@ -698,6 +704,7 @@ namespace Bonobo.Git.Server.Controllers
                 Group = model.Group,
                 Description = model.Description,
                 Users = model.Users,
+                Readers = model.Readers,
                 Administrators = model.Administrators,
                 Teams = model.Teams,
                 IsCurrentUserAdministrator = model.Administrators.Select(x => x.Id).Contains(User.Id()),
@@ -734,6 +741,7 @@ namespace Bonobo.Git.Server.Controllers
                 Group = model.Group,
                 Description = model.Description,
                 Users = model.PostedSelectedUsers != null ? model.PostedSelectedUsers.Select(x => MembershipService.GetUserModel(x)).ToArray() : new UserModel[0],
+                Readers = model.PostedSelectedReaders != null ? model.PostedSelectedReaders.Select(x => MembershipService.GetUserModel(x)).ToArray() : new UserModel[0],
                 Administrators = model.PostedSelectedAdministrators != null ? model.PostedSelectedAdministrators.Select(x => MembershipService.GetUserModel(x)).ToArray() : new UserModel[0],
                 Teams = model.PostedSelectedTeams != null ? model.PostedSelectedTeams.Select(x => TeamRepository.GetTeam(x)).ToArray() : new TeamModel[0],
                 AnonymousAccess = model.AllowAnonymous,

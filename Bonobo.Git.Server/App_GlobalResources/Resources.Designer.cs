@@ -1582,6 +1582,15 @@ namespace Bonobo.Git.Server.App_GlobalResources {
                 return ResourceManager.GetString("Repository_Detail_Users", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Readers.
+        /// </summary>
+        public static string Repository_Detail_Readers {
+            get {
+                return ResourceManager.GetString("Repository_Detail_Readers", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Yes.
@@ -1967,6 +1976,15 @@ namespace Bonobo.Git.Server.App_GlobalResources {
         public static string Repository_UsersHint {
             get {
                 return ResourceManager.GetString("Repository_UsersHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Readers have read-only access to the repository. They can clone or pull and view repository metadata, but cannot push..
+        /// </summary>
+        public static string Repository_ReadersHint {
+            get {
+                return ResourceManager.GetString("Repository_ReadersHint", resourceCulture);
             }
         }
         

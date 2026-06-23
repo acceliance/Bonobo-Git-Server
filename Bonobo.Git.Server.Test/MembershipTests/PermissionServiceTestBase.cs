@@ -68,6 +68,50 @@ namespace Bonobo.Git.Server.Test.MembershipTests
         }
 
         [TestMethod]
+        public void RepoReaderIsAuthorisedToPull()
+        {
+            var user = AddUser();
+            var repoId = AddRepo("TestRepo");
+            AddReaderToRepo(repoId, user);
+
+            Assert.IsTrue(CheckPermission(user.Id, repoId, RepositoryAccessLevel.Pull));
+        }
+
+        [TestMethod]
+        public void RepoReaderIsNotAuthorisedToPush()
+        {
+            var user = AddUser();
+            var repoId = AddRepo("TestRepo");
+            AddReaderToRepo(repoId, user);
+
+            Assert.IsFalse(CheckPermission(user.Id, repoId, RepositoryAccessLevel.Push));
+        }
+
+        [TestMethod]
+        public void RepoReaderIsNotRepositoryAdmin()
+        {
+            var user = AddUser();
+            var repoId = AddRepo("TestRepo");
+            AddReaderToRepo(repoId, user);
+
+            Assert.IsFalse(_service.HasPermission(user.Id, repoId, RepositoryAccessLevel.Administer));
+        }
+
+        [TestMethod]
+        public void RepositoryIsPermittedToReaderForPullOnly()
+        {
+            var user = AddUser();
+            var repoWithReader = MakeRepo("Repo1");
+            repoWithReader.Readers = new[] { user };
+            Assert.IsTrue(_repos.Create(repoWithReader));
+            AddRepo("Repo2");
+
+            Assert.AreEqual("Repo1", _service.GetAllPermittedRepositories(user.Id, RepositoryAccessLevel.Pull).Single().Name);
+            Assert.IsFalse(_service.GetAllPermittedRepositories(user.Id, RepositoryAccessLevel.Push).Any());
+            Assert.IsFalse(_service.GetAllPermittedRepositories(user.Id, RepositoryAccessLevel.Administer).Any());
+        }
+
+        [TestMethod]
         public void RepoAdminIsAuthorised()
         {
             var user = AddUser();
@@ -330,6 +374,11 @@ namespace Bonobo.Git.Server.Test.MembershipTests
         private void AddAdminToRepo(Guid repoId, UserModel adminUser)
         {
             UpdateRepo(repoId, repo => repo.Administrators = new[] { adminUser });
+        }
+
+        private void AddReaderToRepo(Guid repoId, UserModel user)
+        {
+            UpdateRepo(repoId, repo => repo.Readers = new[] { user });
         }
 
         private void AddTeamToRepo(Guid repoId, TeamModel team)

@@ -17,6 +17,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading;
 using System.Web;
@@ -76,6 +77,8 @@ namespace Bonobo.Git.Server
             ConfigureLogging();
             Log.Information("Bonobo starting");
 
+            PreloadSqliteNativeLibrary();
+
             AreaRegistration.RegisterAllAreas();
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
@@ -104,6 +107,41 @@ namespace Bonobo.Git.Server
             {
                 Log.Error(ex, "Startup exception");
                 throw;
+            }
+        }
+
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr LoadLibrary(string lpFileName);
+
+        /// <summary>
+        /// The System.Data.SQLite 2.0.x managed assembly P/Invokes the native 'e_sqlite3' library
+        /// directly. Under ASP.NET the Win32 loader does not search the application's bin\ folder for
+        /// such a direct DllImport (unlike the classic SQLite.Interop.dll, which ships a preloader),
+        /// so we load it explicitly by full path here. Once loaded, the later DllImport("e_sqlite3")
+        /// resolves to this already-loaded module. No-op when the native isn't deployed (e.g. SQL Server).
+        /// </summary>
+        private static void PreloadSqliteNativeLibrary()
+        {
+            try
+            {
+                var nativePath = Path.Combine(HttpRuntime.BinDirectory, "e_sqlite3.dll");
+                if (!File.Exists(nativePath))
+                {
+                    return;
+                }
+
+                if (LoadLibrary(nativePath) == IntPtr.Zero)
+                {
+                    Log.Warning("Failed to preload e_sqlite3.dll from {Path} (Win32 error {Error})", nativePath, Marshal.GetLastWin32Error());
+                }
+                else
+                {
+                    Log.Information("Preloaded native SQLite library from {Path}", nativePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Exception while preloading e_sqlite3.dll");
             }
         }
 

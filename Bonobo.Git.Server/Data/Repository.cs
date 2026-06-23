@@ -21,6 +21,7 @@ namespace Bonobo.Git.Server.Data
         private ICollection<Team> _teams;
         private ICollection<User> _administrators;
         private ICollection<User> _users;
+        private ICollection<User> _readers;
 
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -63,6 +64,18 @@ namespace Bonobo.Git.Server.Data
             set
             {
                 _users = value;
+            }
+        }
+
+        public virtual ICollection<User> Readers
+        {
+            get
+            {
+                return _readers ?? (_readers = new List<User>());
+            }
+            set
+            {
+                _readers = value;
             }
         }
 

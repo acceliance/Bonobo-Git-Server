@@ -110,6 +110,14 @@ else
                 <i class="fa fa-info-circle" title="@Resources.Repository_UsersHint"></i>
             </div>
 
+            <div class="pure-control-group checkboxlist">
+                @Html.LabelFor(m => m.Readers)
+                <span>
+                    @Html.CheckBoxListFor(m => m.PostedSelectedReaders, m => m.AllReaders, m => m.Id, m => m.DisplayName, m => m.Readers, Position.Vertical)
+                </span>
+                <i class="fa fa-info-circle" title="@Resources.Repository_ReadersHint"></i>
+            </div>
+
 
 
             <div class="pure-control-group checkboxlist">
