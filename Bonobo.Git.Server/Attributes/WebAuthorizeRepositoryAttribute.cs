@@ -12,6 +12,19 @@ namespace Bonobo.Git.Server
 
         public bool RequiresRepositoryAdministrator { get; set; }
 
+        private RepositoryAccessLevel _requiredAccess = RepositoryAccessLevel.Push;
+
+        /// <summary>
+        /// The repository access level required to invoke the action. Defaults to Push.
+        /// Read-only view actions should set this to Pull so that read-only members (Readers)
+        /// are permitted. Ignored when <see cref="RequiresRepositoryAdministrator"/> is true.
+        /// </summary>
+        public RepositoryAccessLevel RequiredAccess
+        {
+            get { return _requiredAccess; }
+            set { _requiredAccess = value; }
+        }
+
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
             Guid repoId;
@@ -23,7 +36,7 @@ namespace Bonobo.Git.Server
 
                 var requiredAccess = RequiresRepositoryAdministrator
                     ? RepositoryAccessLevel.Administer
-                    : RepositoryAccessLevel.Push;
+                    : RequiredAccess;
 
                 // Allow anonymous users read-only (Pull) access to repos with AnonymousAccess enabled,
                 // bypassing authentication entirely for those repos.

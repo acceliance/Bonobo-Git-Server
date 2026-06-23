@@ -207,7 +207,7 @@ namespace Bonobo.Git.Server.Controllers
             return RedirectToAction("Index");
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Detail(Guid id)
         {
             ViewBag.ID = id;
@@ -250,7 +250,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Tree(Guid id, string encodedName, string encodedPath)
         {
             bool includeDetails = Request.IsAjaxRequest();
@@ -300,7 +300,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Blob(Guid id, string encodedName, string encodedPath)
         {
             ViewBag.ID = id;
@@ -319,7 +319,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Raw(Guid id, string encodedName, string encodedPath, bool display = false)
         {
             ViewBag.ID = id;
@@ -358,7 +358,7 @@ namespace Bonobo.Git.Server.Controllers
             return HttpNotFound();
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Blame(Guid id, string encodedName, string encodedPath)
         {
             ViewBag.ID = id;
@@ -378,7 +378,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Download(Guid id, string encodedName, string encodedPath)
         {
             var name = PathEncoder.Decode(encodedName);
@@ -434,7 +434,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Tags(Guid id, string encodedName, int page = 1)
         {
             page = page >= 1 ? page : 1;
@@ -459,7 +459,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Commits(Guid id, string encodedName, int? page = null)
         {
             page = page >= 1 ? page : 1;
@@ -521,7 +521,7 @@ namespace Bonobo.Git.Server.Controllers
             }
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult Commit(Guid id, string commit)
         {
             ViewBag.ID = id;
@@ -618,7 +618,7 @@ namespace Bonobo.Git.Server.Controllers
             return View(model);
         }
 
-        [WebAuthorizeRepository]
+        [WebAuthorizeRepository(RequiredAccess = RepositoryAccessLevel.Pull)]
         public ActionResult History(Guid id, string encodedPath, string encodedName)
         {
             ViewBag.ID = id;
