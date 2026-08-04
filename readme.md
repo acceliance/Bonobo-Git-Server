@@ -3,7 +3,32 @@ Bonobo Git Server
 
 [![Build status](https://ci.appveyor.com/api/projects/status/4vyllwtb5i645lrt/branch/master?svg=true)](https://ci.appveyor.com/project/jakubgarfield/bonobo-git-server)
 
+[![Maintained by Acceliance](https://img.shields.io/badge/maintained%20by-Acceliance-0072C6)](https://github.com/acceliance)
+[![Fork of jakubgarfield/Bonobo-Git-Server](https://img.shields.io/badge/fork%20of-jakubgarfield%2FBonobo--Git--Server-lightgrey?logo=github)](https://github.com/jakubgarfield/Bonobo-Git-Server)
+[![.NET Framework 4.8](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/download/dotnet-framework/net48)
+[![Last commit](https://img.shields.io/github/last-commit/acceliance/Bonobo-Git-Server?label=last%20commit)](https://github.com/acceliance/Bonobo-Git-Server/commits/master)
+
 Thank you for downloading Bonobo Git Server. For more information please visit [http://bonobogitserver.com](http://bonobogitserver.com).
+
+
+Acceliance contributions
+-----------------------------------------------
+
+This fork is maintained by [Acceliance](https://github.com/acceliance) and adds the following improvements on top of upstream Bonobo Git Server.
+
+[![Mobile responsive](https://img.shields.io/badge/UI-mobile%20responsive-success)](#)
+[![SVG support](https://img.shields.io/badge/rendering-SVG%20support-success)](#)
+[![Markdown images](https://img.shields.io/badge/markdown-image%20paths%20fixed-success)](#)
+[![Anonymous access](https://img.shields.io/badge/access-anonymous%20mode-success)](#)
+[![Reader profile](https://img.shields.io/badge/roles-reader%20profile-success)](#)
+[![Dependencies](https://img.shields.io/badge/NuGet-dependencies%20updated-success)](#)
+
+* **Mobile responsive UI** — layout and stylesheet reworked so the web frontend is usable on small screens.
+* **SVG support** — SVG files are served and displayed in the repository browser.
+* **Markdown image rendering** — absolute and repository-relative image paths in `README.md` now resolve correctly in the Blob and repository views (URLs generated through the `RepositoryRaw` route, including the repository UUID).
+* **Anonymous access** — an anonymous browsing mode for repositories.
+* **Reader profile** — a read-only user profile.
+* **Updated dependencies** — NuGet packages refreshed to current versions, including the SQL provider dependency fix.
 
 
 Prerequisites
