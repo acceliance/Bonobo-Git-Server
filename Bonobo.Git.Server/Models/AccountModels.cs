@@ -181,4 +181,29 @@ namespace Bonobo.Git.Server.Models
         [Display(ResourceType = typeof(Resources), Name = "Account_Create_ConfirmPassword")]
         public string ConfirmPassword { get; set; }
     }
+
+    public class SshKeyListModel
+    {
+        public Guid UserId { get; set; }
+        public string Username { get; set; }
+
+        public IList<SshKeyModel> Keys { get; set; }
+
+        public AddSshKeyModel NewKey { get; set; }
+    }
+
+    public class AddSshKeyModel
+    {
+        public Guid UserId { get; set; }
+
+        [Required(ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "Validation_Required")]
+        [StringLength(255, ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "Validation_StringLength")]
+        [Display(ResourceType = typeof(Resources), Name = "Account_SshKeys_Name")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "Validation_Required")]
+        [DataType(DataType.MultilineText)]
+        [Display(ResourceType = typeof(Resources), Name = "Account_SshKeys_Key")]
+        public string PublicKey { get; set; }
+    }
 }

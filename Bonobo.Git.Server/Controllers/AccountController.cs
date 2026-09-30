@@ -1,5 +1,6 @@
 ﻿using Bonobo.Git.Server.App_GlobalResources;
 using Bonobo.Git.Server.Configuration;
+using Bonobo.Git.Server.Data;
 using Bonobo.Git.Server.Helpers;
 using Bonobo.Git.Server.Models;
 using Bonobo.Git.Server.Security;
@@ -24,6 +25,12 @@ namespace Bonobo.Git.Server.Controllers
 
         [Dependency]
         public IAuthenticationProvider AuthenticationProvider { get; set; }
+
+        [Dependency]
+        public ISshKeyRepository SshKeyRepository { get; set; }
+
+        [Dependency]
+        public IAuthorizedKeysSynchronizer AuthorizedKeysSynchronizer { get; set; }
 
         [WebAuthorize]
         public ActionResult Detail(Guid id)
@@ -68,7 +75,16 @@ namespace Bonobo.Git.Server.Controllers
                 if (model.Id != User.Id())
                 {
                     var user = MembershipService.GetUserModel(model.Id);
+
+                    // Take the keys away first. Deleting the account but leaving its keys in
+                    // authorized_keys would leave the user with working git access.
+                    foreach (var key in SshKeyRepository.GetKeysForUser(user.Id))
+                    {
+                        SshKeyRepository.RemoveKey(key.Id);
+                    }
+
                     MembershipService.DeleteUser(user.Id);
+                    AuthorizedKeysSynchronizer.Synchronize();
                     TempData["DeleteSuccess"] = true;
                 }
                 else
@@ -174,6 +190,129 @@ namespace Bonobo.Git.Server.Controllers
             model.SelectedRoles = model.PostedSelectedRoles;
 
             return View(model);
+        }
+
+
+        [WebAuthorize]
+        public ActionResult SshKeys(Guid id)
+        {
+            if (!CanManageKeysFor(id))
+            {
+                return RedirectToAction("Unauthorized", "Home");
+            }
+
+            var user = MembershipService.GetUserModel(id);
+            if (user == null)
+            {
+                return View();
+            }
+
+            return View(BuildSshKeyListModel(user));
+        }
+
+        [HttpPost]
+        [WebAuthorize]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddSshKey([Bind(Prefix = "NewKey")] AddSshKeyModel model)
+        {
+            if (!CanManageKeysFor(model.UserId))
+            {
+                return RedirectToAction("Unauthorized", "Home");
+            }
+
+            var user = MembershipService.GetUserModel(model.UserId);
+            if (user == null)
+            {
+                return View("SshKeys");
+            }
+
+            if (ModelState.IsValid)
+            {
+                ParsedSshKey parsedKey;
+                string error;
+                if (!SshKeyParser.TryParse(model.PublicKey, out parsedKey, out error))
+                {
+                    ModelState.AddModelError("NewKey.PublicKey", error);
+                }
+                else
+                {
+                    var added = SshKeyRepository.AddKey(new SshKeyModel
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = model.UserId,
+                        Name = model.Name,
+                        KeyType = parsedKey.KeyType,
+                        PublicKey = parsedKey.Text,
+                        Fingerprint = parsedKey.Fingerprint,
+                        KeySize = parsedKey.KeySize,
+                        CreatedAt = DateTime.UtcNow,
+                    });
+
+                    if (!added)
+                    {
+                        // Deliberately does not say who already has it - that would leak the
+                        // membership of other accounts to anybody holding a public key.
+                        ModelState.AddModelError("NewKey.PublicKey", Resources.Validation_SshKey_Duplicate);
+                    }
+                    else
+                    {
+                        Log.Information("SSH: User {UserId} added key {Fingerprint}", model.UserId, parsedKey.Fingerprint);
+                        AuthorizedKeysSynchronizer.Synchronize();
+                        TempData["SshKeyAddSuccess"] = true;
+                        return RedirectToAction("SshKeys", new { id = model.UserId });
+                    }
+                }
+            }
+
+            var listModel = BuildSshKeyListModel(user);
+            listModel.NewKey = model;
+            return View("SshKeys", listModel);
+        }
+
+        [HttpPost]
+        [WebAuthorize]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteSshKey(Guid id, Guid keyId)
+        {
+            if (!CanManageKeysFor(id))
+            {
+                return RedirectToAction("Unauthorized", "Home");
+            }
+
+            var key = SshKeyRepository.GetKey(keyId);
+
+            // Check the key really belongs to the user in the URL, so that knowing a key id is not
+            // enough to delete somebody else's key.
+            if (key != null && key.UserId == id)
+            {
+                SshKeyRepository.RemoveKey(keyId);
+                Log.Information("SSH: User {UserId} removed key {Fingerprint}", id, key.Fingerprint);
+                AuthorizedKeysSynchronizer.Synchronize();
+                TempData["SshKeyDeleteSuccess"] = true;
+            }
+
+            return RedirectToAction("SshKeys", new { id = id });
+        }
+
+        private SshKeyListModel BuildSshKeyListModel(UserModel user)
+        {
+            return new SshKeyListModel
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                Keys = SshKeyRepository.GetKeysForUser(user.Id),
+                NewKey = new AddSshKeyModel { UserId = user.Id },
+            };
+        }
+
+        /// <summary>
+        /// A user manages their own keys; an administrator may manage anybody's. Keys are stored by
+        /// Bonobo even when membership comes from Active Directory, so this does not depend on the
+        /// membership backend being writable.
+        /// </summary>
+        private bool CanManageKeysFor(Guid userId)
+        {
+            return userId == User.Id() || User.IsInRole(Definitions.Roles.Administrator);
         }
 
         public ActionResult CreateADUser()

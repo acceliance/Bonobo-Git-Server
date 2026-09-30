@@ -48,6 +48,19 @@ namespace Bonobo.Git.Server.Models
         [Display(ResourceType = typeof(Resources), Name = "Settings_Global_LinksUrl")]
         public string LinksUrl { get; set; }
 
+        [Display(ResourceType = typeof(Resources), Name = "Settings_Global_SshEnabled")]
+        public bool SshEnabled { get; set; }
+
+        [Display(ResourceType = typeof(Resources), Name = "Settings_Global_SshHost")]
+        public string SshHost { get; set; }
+
+        [Range(0, 65535)]
+        [Display(ResourceType = typeof(Resources), Name = "Settings_Global_SshPort")]
+        public int SshPort { get; set; }
+
+        [Display(ResourceType = typeof(Resources), Name = "Settings_Global_SshUser")]
+        public string SshUser { get; set; }
+
         [Remote("IsValidRegex", "Validation")]
         [IsValidRegex]
         [Display(ResourceType = typeof(Resources), Name = "Settings_Global_LinksRegex")]

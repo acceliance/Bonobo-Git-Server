@@ -360,6 +360,8 @@
     <Compile Include="Data\Update\Sqlite\AddRepoLinksColumns.cs" />
     <Compile Include="Data\Update\Sqlite\AddRepoReaders.cs" />
     <Compile Include="Data\Update\SqlServer\AddRepoReaders.cs" />
+    <Compile Include="Data\Update\Sqlite\AddSshKeys.cs" />
+    <Compile Include="Data\Update\SqlServer\AddSshKeys.cs" />
     <Compile Include="Data\Update\Sqlite\AddRepositoryLogo.cs" />
     <Compile Include="Data\Update\SqlServer\AddGuidColumn.cs" />
     <Compile Include="Data\Update\SqlServer\AddRepoLinksColumns.cs" />
@@ -441,6 +443,11 @@
     <Compile Include="Data\User.cs" />
     <Compile Include="Data\EFRepositoryRepository.cs" />
     <Compile Include="Data\EFTeamRepository.cs" />
+    <Compile Include="Data\EFSshKeyRepository.cs" />
+    <Compile Include="Data\ADSshKeyRepository.cs" />
+    <Compile Include="Data\ISshKeyRepository.cs" />
+    <Compile Include="Data\SshKey.cs" />
+    <Compile Include="Data\Mapping\SshKeyMap.cs" />
     <Compile Include="Data\IRepositoryRepository.cs" />
     <Compile Include="Data\ITeamRepository.cs" />
     <Compile Include="Attributes\EmailAttribute.cs" />
@@ -469,6 +476,9 @@
     <Compile Include="RepositoryBrowser.cs" />
     <Compile Include="Security\EFMembershipService.cs" />
     <Compile Include="Security\RepositoryPermissionService.cs" />
+    <Compile Include="Security\AuthorizedKeysSynchronizer.cs" />
+    <Compile Include="Security\SshCommandParser.cs" />
+    <Compile Include="Security\SshKeyParser.cs" />
     <Compile Include="Controllers\GitController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -479,6 +489,8 @@
     <Compile Include="Security\IMembershipService.cs" />
     <Compile Include="Security\IPasswordService.cs" />
     <Compile Include="Security\IRepositoryPermissionService.cs" />
+    <Compile Include="Configuration\SshSettings.cs" />
+    <Compile Include="Models\SshKeyModel.cs" />
     <Compile Include="FileDisplayHandler.cs" />
     <Compile Include="Security\PasswordService.cs" />
     <Compile Include="FilterProviders\UnityFilterAttributeFilterProvider.cs" />
@@ -653,6 +665,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Account\Create.cshtml" />
+    <Content Include="Views\Account\SshKeys.cshtml" />
     <Content Include="Views\Team\Delete.cshtml" />
     <Content Include="Views\Repository\Delete.cshtml" />
     <Content Include="Views\Account\Delete.cshtml" />

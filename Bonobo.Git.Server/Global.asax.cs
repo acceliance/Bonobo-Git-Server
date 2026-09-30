@@ -102,6 +102,10 @@ namespace Bonobo.Git.Server
 
                 new AutomaticUpdater().Run();
                 new RepositorySynchronizer().Run();
+
+                // Rebuild authorized_keys from the database, so that a file which was lost, restored
+                // from an old backup, or edited by hand comes back into line with what Bonobo believes.
+                DependencyResolver.Current.GetService<IAuthorizedKeysSynchronizer>().Synchronize();
             }
             catch (Exception ex)
             {
@@ -184,6 +188,7 @@ namespace Bonobo.Git.Server
                     container.RegisterType<IRoleProvider, ADRoleProvider>();
                     container.RegisterType<ITeamRepository, ADTeamRepository>();
                     container.RegisterType<IRepositoryRepository, ADRepositoryRepository>();
+                    container.RegisterType<ISshKeyRepository, ADSshKeyRepository>();
                     container.RegisterType<IRepositoryPermissionService, RepositoryPermissionService>();
                     break;
                 case "internal":
@@ -191,6 +196,7 @@ namespace Bonobo.Git.Server
                     container.RegisterType<IRoleProvider, EFRoleProvider>();
                     container.RegisterType<ITeamRepository, EFTeamRepository>();
                     container.RegisterType<IRepositoryRepository, EFRepositoryRepository>();
+                    container.RegisterType<ISshKeyRepository, EFSshKeyRepository>();
                     container.RegisterType<IRepositoryPermissionService, RepositoryPermissionService>();
                     break;
                 default:
@@ -221,6 +227,8 @@ namespace Bonobo.Git.Server
                     GitHomePath = GetRootPath(ConfigurationManager.AppSettings["GitHomePath"]),
                     RepositoriesDirPath = UserConfiguration.Current.Repositories,
                 });
+
+            container.RegisterType<IAuthorizedKeysSynchronizer, AuthorizedKeysSynchronizer>();
 
             container.RegisterType<IDatabaseResetManager, DatabaseResetManager>();
 

@@ -343,3 +343,11 @@ img.repo-logo { width:36px; height: auto; image-rendering: -moz-crisp-edges; ima
     .pure-form select,
     .pure-form textarea { max-width: 100%; }
 }
+
+/* ── SSH keys ─────────────────────────────────────────────── */
+input.small { width: 8em; }
+.ssh-key-input { width: 40em; max-width: 100%; font-family: Consolas, Monaco, monospace; font-size: 0.85em; word-break: break-all; }
+.ssh-fingerprint { font-family: Consolas, Monaco, monospace; font-size: 0.85em; word-break: break-all; }
+.ssh-keytype { color: #888; font-size: 0.85em; white-space: nowrap; }
+.ssh-hint { color: #666; max-width: 44em; }
+.inline-form { display: inline; margin: 0; padding: 0; }

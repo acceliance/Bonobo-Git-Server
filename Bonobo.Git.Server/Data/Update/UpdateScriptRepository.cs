@@ -24,7 +24,8 @@ namespace Bonobo.Git.Server.Data.Update
                         new Sqlite.AddRepoPushColumn(),
                         new Sqlite.AddRepoLinksColumn(),
                         new Sqlite.AddRepoReaders(),
-                        new Sqlite.InsertDefaultData()
+                        new Sqlite.InsertDefaultData(),
+                        new Sqlite.AddSshKeys()
                     };
                 case "SqlConnection":
                     return new List<IUpdateScript>
@@ -38,7 +39,8 @@ namespace Bonobo.Git.Server.Data.Update
                         new SqlServer.AddRepoPushColumn(),
                         new SqlServer.AddRepoLinksColumn(),
                         new SqlServer.AddRepoReaders(),
-                        new SqlServer.InsertDefaultData()
+                        new SqlServer.InsertDefaultData(),
+                        new SqlServer.AddSshKeys()
                     };
                 default:
                     throw new NotImplementedException($"The provider '{sqlProvider}' is not supported yet");

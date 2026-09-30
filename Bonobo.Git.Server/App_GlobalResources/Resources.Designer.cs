@@ -2577,5 +2577,275 @@ namespace Bonobo.Git.Server.App_GlobalResources {
                 return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH Keys.
+        /// </summary>
+        public static string Account_Detail_SshKeys {
+            get {
+                return ResourceManager.GetString("Account_Detail_SshKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH Keys.
+        /// </summary>
+        public static string Account_SshKeys_Title {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add SSH Key.
+        /// </summary>
+        public static string Account_SshKeys_Add {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Add", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string Account_SshKeys_Name {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key.
+        /// </summary>
+        public static string Account_SshKeys_Key {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Key", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fingerprint.
+        /// </summary>
+        public static string Account_SshKeys_Fingerprint {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Fingerprint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Added.
+        /// </summary>
+        public static string Account_SshKeys_Added {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Added", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last Used.
+        /// </summary>
+        public static string Account_SshKeys_LastUsed {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_LastUsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Never used.
+        /// </summary>
+        public static string Account_SshKeys_NeverUsed {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_NeverUsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string Account_SshKeys_Delete {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete this SSH key?.
+        /// </summary>
+        public static string Account_SshKeys_DeleteConfirm {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_DeleteConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no SSH keys on this account yet..
+        /// </summary>
+        public static string Account_SshKeys_Empty {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The SSH key was added..
+        /// </summary>
+        public static string Account_SshKeys_AddSuccess {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_AddSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The SSH key was deleted..
+        /// </summary>
+        public static string Account_SshKeys_DeleteSuccess {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_DeleteSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paste the contents of your public key file, usually ~/.ssh/id_ed25519.pub. It is a single line starting with a....
+        /// </summary>
+        public static string Account_SshKeys_Hint {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_Hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH access is not enabled on this server, so these keys do not grant access yet. An administrator can enable i....
+        /// </summary>
+        public static string Account_SshKeys_NotConfigured {
+            get {
+                return ResourceManager.GetString("Account_SshKeys_NotConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH Repository Location.
+        /// </summary>
+        public static string Repository_Detail_Location_Ssh {
+            get {
+                return ResourceManager.GetString("Repository_Detail_Location_Ssh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Offer SSH clone URLs.
+        /// </summary>
+        public static string Settings_Global_SshEnabled {
+            get {
+                return ResourceManager.GetString("Settings_Global_SshEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH host name.
+        /// </summary>
+        public static string Settings_Global_SshHost {
+            get {
+                return ResourceManager.GetString("Settings_Global_SshHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH port.
+        /// </summary>
+        public static string Settings_Global_SshPort {
+            get {
+                return ResourceManager.GetString("Settings_Global_SshPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH user.
+        /// </summary>
+        public static string Settings_Global_SshUser {
+            get {
+                return ResourceManager.GetString("Settings_Global_SshUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key cannot be empty..
+        /// </summary>
+        public static string Validation_SshKey_Empty {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_Empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This does not look like an OpenSSH public key. It should be a single line starting with a key type, followed b....
+        /// </summary>
+        public static string Validation_SshKey_Malformed {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_Malformed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That is a private key. Never share it - paste the matching public key instead, which is the file ending in .pu....
+        /// </summary>
+        public static string Validation_SshKey_PrivateKey {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_PrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please add one key at a time. A public key is a single line..
+        /// </summary>
+        public static string Validation_SshKey_MultipleLines {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_MultipleLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key type '{0}' is not supported. Supported types are: {1}..
+        /// </summary>
+        public static string Validation_SshKey_UnsupportedType {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_UnsupportedType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key data does not match the key type in front of it..
+        /// </summary>
+        public static string Validation_SshKey_TypeMismatch {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_TypeMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DSA keys (ssh-dss) are no longer considered secure and are not accepted. Please create an ed25519 key instead..
+        /// </summary>
+        public static string Validation_SshKey_DsaNotSupported {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_DsaNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RSA keys must be at least {0} bits. Please create a larger key, or an ed25519 key..
+        /// </summary>
+        public static string Validation_SshKey_RsaTooSmall {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_RsaTooSmall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This key is already in use..
+        /// </summary>
+        public static string Validation_SshKey_Duplicate {
+            get {
+                return ResourceManager.GetString("Validation_SshKey_Duplicate", resourceCulture);
+            }
+        }
     }
 }

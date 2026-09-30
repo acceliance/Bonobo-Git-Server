@@ -21,6 +21,7 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 [![Markdown images](https://img.shields.io/badge/markdown-image%20paths%20fixed-success)](#)
 [![Anonymous access](https://img.shields.io/badge/access-anonymous%20mode-success)](#)
 [![Reader profile](https://img.shields.io/badge/roles-reader%20profile-success)](#)
+[![SSH keys](https://img.shields.io/badge/access-SSH%20keys-success)](#)
 [![Dependencies](https://img.shields.io/badge/NuGet-dependencies%20updated-success)](#)
 
 * **Mobile responsive UI** — layout and stylesheet reworked so the web frontend is usable on small screens.
@@ -28,6 +29,7 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 * **Markdown image rendering** — absolute and repository-relative image paths in `README.md` now resolve correctly in the Blob and repository views (URLs generated through the `RepositoryRaw` route, including the repository UUID).
 * **Anonymous access** — an anonymous browsing mode for repositories.
 * **Reader profile** — a read-only user profile.
+* **SSH keys** — users register SSH public keys on their account and clone over `git@server:repository.git`, the way GitHub works. Served by Windows OpenSSH with a forced command; see [SSH access](#ssh-access).
 * **Updated dependencies** — NuGet packages refreshed to current versions, including the SQL provider dependency fix.
 
 
@@ -145,6 +147,105 @@ Bonobo provides the following environment variables:
 * `AUTH_USER_DISPLAYNAME`: Given Name + Surname if available. Else the username.
 
 **Beware that due to the way HTTP basic authentication works, if anonymous operations (push/pull) are enabled the variables above will always be empty!**
+
+SSH access
+-----------------------------------------------
+
+Users can register SSH public keys on their account and clone over `git@server:repository.git`,
+in the same way as GitHub. Keys are managed from **Account settings -> SSH Keys**.
+
+IIS cannot serve SSH, so the SSH side is handled by **Windows OpenSSH**, which ships with Windows
+Server 2019 and later. Bonobo owns the `authorized_keys` file: every key is written with a forced
+command, so authenticating with a Bonobo key can only ever start `Bonobo.Git.Server.SshShell.exe`,
+never a shell. That program checks the same permissions the web site uses, and then runs git.
+
+Nothing below is done for you, and SSH stays off until all of it is in place.
+
+#### 1. Install OpenSSH Server
+
+    Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+    Set-Service -Name sshd -StartupType Automatic
+    Start-Service sshd
+
+#### 2. Create the git account
+
+This is the account clients log in as, and the account sshd runs the forced command as. It needs
+read access to the repository directory and to the Bonobo database, and nothing else. It does not
+need to be an administrator, and it should not be the IIS application pool identity.
+
+    New-LocalUser -Name git -NoPassword -UserMayNotChangePassword
+    Set-LocalUser -Name git -PasswordNeverExpires $true
+
+#### 3. Deploy the shell
+
+Copy the build output of `Bonobo.Git.Server.SshShell` to a folder outside the web root, for
+example `C:\ProgramData\Bonobo\ssh`. Then edit `Bonobo.Git.Server.SshShell.exe.config` so that
+the connection string and the `UserConfiguration`, `GitPath`, `GitHomePath` and `LogDirectory`
+settings point at the **same** installation the web site uses. They must all be absolute paths:
+the shell runs outside IIS, so there is no site root for a `~\App_Data\...` path to resolve
+against.
+
+#### 4. Point sshd at Bonobo's authorized_keys file
+
+In `%ProgramData%\ssh\sshd_config`:
+
+    Match User git
+        AuthorizedKeysFile C:\ProgramData\Bonobo\ssh\authorized_keys
+        PubkeyAuthentication yes
+        PasswordAuthentication no
+        AllowTcpForwarding no
+        PermitTTY no
+        X11Forwarding no
+
+Restart sshd afterwards with `Restart-Service sshd`.
+
+#### 5. Tell Bonobo where those files are
+
+In `web.config`:
+
+    <add key="SshAuthorizedKeysPath" value="C:\ProgramData\Bonobo\ssh\authorized_keys" />
+    <add key="SshShellPath" value="C:\ProgramData\Bonobo\ssh\Bonobo.Git.Server.SshShell.exe" />
+    <add key="SshServiceAccount" value="git" />
+
+The application pool identity needs write access to the folder holding `authorized_keys`, because
+Bonobo rewrites that file whenever a key is added or removed, and once at every start-up.
+
+#### 6. Turn it on
+
+Log in as an administrator, go to **Global Settings**, tick **Offer SSH clone URLs** and set the
+**SSH host name** clients should use. Set the port only if sshd is not on 22. Repository pages
+will then show an SSH clone URL beside the HTTP one.
+
+#### Troubleshooting
+
+* **`Permission denied (publickey)`** is almost always the file permissions on `authorized_keys`.
+  Windows OpenSSH refuses to read a file that other accounts can write to. Bonobo tries to lock the
+  file down to SYSTEM, Administrators, the application pool identity and the account named in
+  `SshServiceAccount`, but it can only do that if it owns the file. Check `sshd`'s own log, and if
+  necessary fix the ACL by hand once. Setting `SshHardenAuthorizedKeysPermissions` to `false` in
+  `web.config` stops Bonobo touching the ACL at all.
+* **Everything is refused with "This account is only for git access"** means sshd is invoking the
+  shell without the key id argument, i.e. it is not using the generated `authorized_keys`. Check
+  the `AuthorizedKeysFile` path and that `StrictModes` is not rejecting the file.
+* Bonobo's own view of what happened is in `App_Data\Logs\ssh-*.txt`, written by the shell, and
+  `App_Data\Logs\log-*.txt` for the file generation.
+* Only `git-upload-pack`, `git-receive-pack` and `git-upload-archive` are accepted. An interactive
+  `ssh git@server` is refused by design.
+
+#### Notes
+
+* Keys grant exactly the permissions the owning user already has - there is no separate SSH
+  permission model, and a key cannot be shared between two accounts.
+* Anonymous access is an HTTP concept and does not apply over SSH: every SSH connection is an
+  identified user.
+* Hooks receive `AUTH_USER`, `REMOTE_USER`, `AUTH_USER_TEAMS`, `AUTH_USER_ROLES` and
+  `AUTH_USER_DISPLAYNAME` exactly as they do over HTTP, and unlike HTTP they are never empty.
+* Deleting a user, or deleting a key, rewrites `authorized_keys` immediately.
+* ed25519 keys are recommended. RSA keys below 2048 bits and DSA keys are refused.
+
+<hr />
+
+
 
 New release
 -----------------------------------------------

@@ -11,6 +11,7 @@ namespace Bonobo.Git.Server.Data
         private ICollection<Repository> _readableRepositories;
         private ICollection<Role> _roles;
         private ICollection<Team> _teams;
+        private ICollection<SshKey> _sshKeys;
 
         public Guid Id { get; set; }
         public string GivenName { get; set; }
@@ -65,6 +66,18 @@ namespace Bonobo.Git.Server.Data
             set
             {
                 _roles = value;
+            }
+        }
+
+        public virtual ICollection<SshKey> SshKeys
+        {
+            get
+            {
+                return _sshKeys ?? (_sshKeys = new List<SshKey>());
+            }
+            set
+            {
+                _sshKeys = value;
             }
         }
 

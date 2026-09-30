@@ -158,6 +158,9 @@ namespace Bonobo.Git.Server.Models
         public string GitUrl { get; set; }
         public string PersonalGitUrl { get; set; }
 
+        /// <summary>Null unless an administrator has configured and enabled SSH</summary>
+        public string SshUrl { get; set; }
+
         [Remote("IsValidRegex", "Validation")]
         [IsValidRegex]
         [Display(ResourceType = typeof(Resources), Name = "Settings_Global_LinksRegex")]

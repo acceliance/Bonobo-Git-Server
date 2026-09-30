@@ -29,6 +29,15 @@
                 <span class="git-url-text">@Model.GitUrl</span>
             </div>
 
+            @if (!string.IsNullOrEmpty(Model.SshUrl))
+            {
+                <div class="pure-control-group">
+                    <label>@Resources.Repository_Detail_Location_Ssh</label>
+                    <button class="pure-button copy-to-clip-button" data-clipboard-target=".ssh-url-text"><i class="fa fa-copy"></i>@Resources.Copy</button>
+                    <span class="ssh-url-text">@Model.SshUrl</span>
+                </div>
+            }
+
             @if (User.Identity.IsAuthenticated) {
                 <div class="pure-control-group">
                     <label>

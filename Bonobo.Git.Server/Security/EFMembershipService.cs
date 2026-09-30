@@ -193,6 +193,9 @@ namespace Bonobo.Git.Server.Security
                     user.Roles.Clear();
                     user.Repositories.Clear();
                     user.Teams.Clear();
+                    // SshKey has a required foreign key, so the rows have to go explicitly rather
+                    // than being detached like the many-to-many collections above
+                    db.SshKeys.RemoveRange(db.SshKeys.Where(k => k.UserId == id));
                     db.Users.Remove(user);
                     db.SaveChanges();
                 }

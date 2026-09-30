@@ -63,6 +63,22 @@
             <label for="AllowPushToCreate" class="pure-checkbox">@Html.CheckBoxFor(m => m.AllowPushToCreate) @Model.GetType().GetDisplayValue("AllowPushToCreate") <i class="fa fa-info-circle" title="@Resources.Settings_Global_AllowPushToCreate_Hint"></i></label>
             <label for="AllowAnonymousPush" class="pure-checkbox">@Html.CheckBoxFor(m => m.AllowAnonymousPush) @Model.GetType().GetDisplayValue("AllowAnonymousPush")</label>
             <label for="IsCommitAuthorAvatarVisible" class="pure-checkbox">@Html.CheckBoxFor(m => m.IsCommitAuthorAvatarVisible) @Model.GetType().GetDisplayValue("IsCommitAuthorAvatarVisible")</label>
+            <label for="SshEnabled" class="pure-checkbox">@Html.CheckBoxFor(m => m.SshEnabled) @Model.GetType().GetDisplayValue("SshEnabled")</label>
+        </div>
+        <div class="pure-control-group">
+            @Html.LabelFor(m => m.SshHost)
+            @Html.TextBoxFor(m => m.SshHost, new { @class = "medium" })
+            @Html.ValidationMessageFor(m => m.SshHost)
+        </div>
+        <div class="pure-control-group">
+            @Html.LabelFor(m => m.SshPort)
+            @Html.TextBoxFor(m => m.SshPort, new { @class = "small" })
+            @Html.ValidationMessageFor(m => m.SshPort)
+        </div>
+        <div class="pure-control-group">
+            @Html.LabelFor(m => m.SshUser)
+            @Html.TextBoxFor(m => m.SshUser, new { @class = "medium" })
+            @Html.ValidationMessageFor(m => m.SshUser)
         </div>
         <div class="pure-control-group">
             @Html.LabelFor(m => m.LinksRegex)

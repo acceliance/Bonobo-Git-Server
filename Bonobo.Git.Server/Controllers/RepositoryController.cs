@@ -243,6 +243,7 @@ namespace Bonobo.Git.Server.Controllers
                                        );
 
             model.GitUrl = String.Concat(serverAddress, model.Name, ".git");
+            model.SshUrl = UserConfiguration.Current.GetSshUrl(model.Name);
             if (User.Identity.IsAuthenticated)
             {
                 model.PersonalGitUrl =

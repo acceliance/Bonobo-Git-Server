@@ -63,6 +63,16 @@ after_build:
 
     Write-Host "End Creating Packages"
 
+    Write-Host "Add SSH shell to the package"
+
+    $sshShellSource = 'C:\projects\bonobo-git-server\Bonobo.Git.Server.SshShell\bin\Release'
+
+    $sshShellTarget = 'C:\projects\bonobo-git-server\Bonobo_install\Bonobo.Git.Server.SshShell'
+
+    New-Item -ItemType Directory -Force -Path $sshShellTarget | Out-Null
+
+    Copy-Item -Path "$sshShellSource\*" -Destination $sshShellTarget -Recurse -Force
+
     Write-Host "Create bonobo-git-server.zip"
 
     Add-Type -assembly "system.io.compression.filesystem"

@@ -33,6 +33,10 @@ namespace Bonobo.Git.Server.Controllers
                 IsCommitAuthorAvatarVisible = UserConfiguration.Current.IsCommitAuthorAvatarVisible,
                 LinksRegex = UserConfiguration.Current.LinksRegex,
                 LinksUrl = UserConfiguration.Current.LinksUrl,
+                SshEnabled = UserConfiguration.Current.SshEnabled,
+                SshHost = UserConfiguration.Current.SshHost,
+                SshPort = UserConfiguration.Current.SshPort,
+                SshUser = UserConfiguration.Current.SshUser,
             });
         }
 
@@ -67,6 +71,10 @@ namespace Bonobo.Git.Server.Controllers
                         UserConfiguration.Current.IsCommitAuthorAvatarVisible = model.IsCommitAuthorAvatarVisible;
                         UserConfiguration.Current.LinksRegex = model.LinksRegex;
                         UserConfiguration.Current.LinksUrl = model.LinksUrl;
+                        UserConfiguration.Current.SshEnabled = model.SshEnabled;
+                        UserConfiguration.Current.SshHost = model.SshHost;
+                        UserConfiguration.Current.SshPort = model.SshPort;
+                        UserConfiguration.Current.SshUser = model.SshUser;
                         UserConfiguration.Current.Save();
 
                         this.Session["Culture"] = new CultureInfo(model.DefaultLanguage);
