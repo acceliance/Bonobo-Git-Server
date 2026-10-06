@@ -1368,6 +1368,96 @@ namespace Bonobo.Git.Server.App_GlobalResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Import from URL.
+        /// </summary>
+        public static string Repository_Create_ImportUrl {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Optional. An http or https Git repository, for example on GitHub, whose branches and tags are copied into the new repository. Leave empty to create an empty repository..
+        /// </summary>
+        public static string Repository_Create_ImportUrlHint {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportUrlHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The import URL must be an http:// or https:// address..
+        /// </summary>
+        public static string Repository_Create_ImportUrlInvalid {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportUrlInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import user name.
+        /// </summary>
+        public static string Repository_Create_ImportUsername {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportUsername", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import password or token.
+        /// </summary>
+        public static string Repository_Create_ImportPassword {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only needed for private repositories. For GitHub, use a personal access token and leave the user name empty. These credentials are used once and are not stored..
+        /// </summary>
+        public static string Repository_Create_ImportPasswordHint {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportPasswordHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The remote repository could not be read. Check the URL; if the repository is private, enter a user name and a token that can read it..
+        /// </summary>
+        public static string Repository_Create_ImportAuthenticationFailure {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportAuthenticationFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The import failed: {0}.
+        /// </summary>
+        public static string Repository_Create_ImportFailure {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The import was stopped because it took too long..
+        /// </summary>
+        public static string Repository_Create_ImportTimeout {
+            get {
+                return ResourceManager.GetString("Repository_Create_ImportTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Importing….
+        /// </summary>
+        public static string Repository_Create_Importing {
+            get {
+                return ResourceManager.GetString("Repository_Create_Importing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create New Repository.
         /// </summary>
         public static string Repository_Create_Title {

@@ -2,11 +2,13 @@
 using Bonobo.Git.Server.Configuration;
 using Bonobo.Git.Server.Data;
 using Bonobo.Git.Server.Data.Update;
+using Bonobo.Git.Server.Git;
 using Bonobo.Git.Server.Helpers;
 using Bonobo.Git.Server.Models;
 using Bonobo.Git.Server.Security;
 using Ionic.Zip;
 using MimeTypes;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -148,6 +150,13 @@ namespace Bonobo.Git.Server.Controllers
                 model.Name = Regex.Replace(model.Name, @"\s", "");
             }
 
+            ImportSource importSource = null;
+            if (model != null && !String.IsNullOrWhiteSpace(model.ImportUrl)
+                && !RepositoryImporter.TryParseSource(model.ImportUrl, model.ImportUsername, model.ImportPassword, out importSource))
+            {
+                ModelState.AddModelError("ImportUrl", Resources.Repository_Create_ImportUrlInvalid);
+            }
+
             if (model != null && String.IsNullOrEmpty(model.Name))
             {
                 ModelState.AddModelError("Name", Resources.Repository_Create_NameFailure);
@@ -162,14 +171,17 @@ namespace Bonobo.Git.Server.Controllers
                     if (!Directory.Exists(path))
                     {
                         LibGit2Sharp.Repository.Init(path, true);
-                        TempData["CreateSuccess"] = true;
-                        TempData["SuccessfullyCreatedRepositoryName"] = model.Name;
-                        TempData["SuccessfullyCreatedRepositoryId"] = repo_model.Id;
-                        return RedirectToAction("Index");
+                        if (importSource == null || TryImport(importSource, path, repo_model.Id))
+                        {
+                            TempData["CreateSuccess"] = true;
+                            TempData["SuccessfullyCreatedRepositoryName"] = model.Name;
+                            TempData["SuccessfullyCreatedRepositoryId"] = repo_model.Id;
+                            return RedirectToAction("Index");
+                        }
                     }
                     else
                     {
-                        RepositoryRepository.Delete(model.Id);
+                        RepositoryRepository.Delete(repo_model.Id);
                         ModelState.AddModelError("", Resources.Repository_Create_DirectoryExists);
                     }
                 }
@@ -180,6 +192,47 @@ namespace Bonobo.Git.Server.Controllers
             }
             PopulateCheckboxListData(ref model);
             return View(model);
+        }
+
+        /// <summary>
+        /// Fills the just-created repository from the remote. On failure the repository is removed
+        /// again - from disk and from the database - so the user can simply correct the form and resubmit.
+        /// </summary>
+        private bool TryImport(ImportSource source, string path, Guid repositoryId)
+        {
+            // A large repository can take far longer than the default request timeout
+            Server.ScriptTimeout = (int)RepositoryImporter.Timeout.TotalSeconds + 60;
+            try
+            {
+                RepositoryImporter.Import(source, path);
+                return true;
+            }
+            catch (LibGit2Sharp.LibGit2SharpException ex)
+            {
+                Log.Warning(ex, "Import: could not fetch {Url} into {Path}", source.Url, path);
+                string error;
+                if (ex is LibGit2Sharp.UserCancelledException)
+                {
+                    error = Resources.Repository_Create_ImportTimeout;
+                }
+                else if (ex.Message.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    // GitHub answers 401 for a repository that doesn't exist as well as for a private one
+                    error = Resources.Repository_Create_ImportAuthenticationFailure;
+                }
+                else
+                {
+                    error = String.Format(Resources.Repository_Create_ImportFailure, ex.Message);
+                }
+                ModelState.AddModelError("ImportUrl", error);
+            }
+
+            if (Directory.Exists(path))
+            {
+                DeleteFileSystemInfo(new DirectoryInfo(path));
+            }
+            RepositoryRepository.Delete(repositoryId);
+            return false;
         }
 
         [WebAuthorizeRepository(RequiresRepositoryAdministrator = true)]

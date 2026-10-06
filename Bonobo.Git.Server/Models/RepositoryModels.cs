@@ -169,6 +169,20 @@ namespace Bonobo.Git.Server.Models
         public string LinksUrl { get; set; }
         [Display(ResourceType = typeof(Resources), Name = "Repository_Detail_LinksUseGlobal")]
         public bool LinksUseGlobal { get; set; }
+
+        /// <summary>Create only: an http(s) repository to copy branches and tags from</summary>
+        [Display(ResourceType = typeof(Resources), Name = "Repository_Create_ImportUrl")]
+        [StringLength(2000, ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "Validation_StringLength")]
+        public string ImportUrl { get; set; }
+
+        /// <summary>Create only: used for the import and never stored</summary>
+        [Display(ResourceType = typeof(Resources), Name = "Repository_Create_ImportUsername")]
+        public string ImportUsername { get; set; }
+
+        /// <summary>Create only: used for the import and never stored</summary>
+        [DataType(DataType.Password)]
+        [Display(ResourceType = typeof(Resources), Name = "Repository_Create_ImportPassword")]
+        public string ImportPassword { get; set; }
     }
 
     public enum RepositoryDetailStatus

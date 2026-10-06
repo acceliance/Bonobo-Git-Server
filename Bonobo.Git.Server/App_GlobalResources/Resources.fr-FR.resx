@@ -911,4 +911,34 @@ The regular C# string formatting rules apply: To get {} in your link you need to
   <data name="Yes" xml:space="preserve">
     <value>Oui</value>
   </data>
+  <data name="Repository_Create_ImportUrl" xml:space="preserve">
+    <value>Importer depuis une URL</value>
+  </data>
+  <data name="Repository_Create_ImportUrlHint" xml:space="preserve">
+    <value>Facultatif. Un dépôt Git http ou https, par exemple sur GitHub, dont les branches et les tags sont copiés dans le nouveau dépôt. Laisser vide pour créer un dépôt vide.</value>
+  </data>
+  <data name="Repository_Create_ImportUrlInvalid" xml:space="preserve">
+    <value>L'URL d'import doit être une adresse http:// ou https://.</value>
+  </data>
+  <data name="Repository_Create_ImportUsername" xml:space="preserve">
+    <value>Utilisateur pour l'import</value>
+  </data>
+  <data name="Repository_Create_ImportPassword" xml:space="preserve">
+    <value>Mot de passe ou jeton pour l'import</value>
+  </data>
+  <data name="Repository_Create_ImportPasswordHint" xml:space="preserve">
+    <value>Uniquement pour les dépôts privés. Pour GitHub, utilisez un jeton d'accès personnel et laissez l'utilisateur vide. Ces identifiants servent une seule fois et ne sont pas conservés.</value>
+  </data>
+  <data name="Repository_Create_ImportFailure" xml:space="preserve">
+    <value>L'import a échoué : {0}</value>
+  </data>
+  <data name="Repository_Create_ImportTimeout" xml:space="preserve">
+    <value>L'import a été interrompu car il prenait trop de temps.</value>
+  </data>
+  <data name="Repository_Create_Importing" xml:space="preserve">
+    <value>Import en cours…</value>
+  </data>
+  <data name="Repository_Create_ImportAuthenticationFailure" xml:space="preserve">
+    <value>Impossible de lire le dépôt distant. Vérifiez l'URL ; si le dépôt est privé, saisissez un utilisateur et un jeton ayant accès en lecture.</value>
+  </data>
 </root>

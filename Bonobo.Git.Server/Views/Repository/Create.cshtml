@@ -13,6 +13,21 @@
     
     <fieldset>
         <div class="pure-control-group">
+            @Html.LabelFor(m => m.ImportUrl)
+            @Html.TextBoxFor(m => m.ImportUrl, new { @class = "medium", type = "url", placeholder = "https://github.com/owner/project.git" })
+            <i class="fa fa-info-circle" title="@Resources.Repository_Create_ImportUrlHint"></i>
+            @Html.ValidationMessageFor(m => m.ImportUrl)
+        </div>
+        <div class="pure-control-group import-credentials">
+            @Html.LabelFor(m => m.ImportUsername)
+            @Html.TextBoxFor(m => m.ImportUsername, new { autocomplete = "off" })
+        </div>
+        <div class="pure-control-group import-credentials">
+            @Html.LabelFor(m => m.ImportPassword)
+            @Html.PasswordFor(m => m.ImportPassword, new { autocomplete = "new-password" })
+            <i class="fa fa-info-circle" title="@Resources.Repository_Create_ImportPasswordHint"></i>
+        </div>
+        <div class="pure-control-group">
             @Html.LabelFor(m => m.Name)
             @Html.TextBoxFor(m => m.Name, new {autofocus = ""})<em>*</em>
             @Html.ValidationMessageFor(m => m.Name)
@@ -108,4 +123,32 @@
                 <button type="submit" class="pure-button pure-button-primary"><i class="fa fa-save"></i> @Resources.Repository_Create_Submit</button>
             </div>
 </fieldset>
+}
+
+@section scripts {
+<script>
+    (function () {
+        var url = document.getElementById('ImportUrl');
+        var name = document.getElementById('Name');
+        var button = document.querySelector('form button[type=submit]');
+        var suggested = '';
+
+        // Offer the last path segment of the import URL as the repository name, unless the user typed their own
+        url.addEventListener('input', function () {
+            var match = /([^\/:]+?)(\.git)?\/*$/.exec(url.value.trim());
+            var candidate = match ? match[1] : '';
+            if (name.value === '' || name.value === suggested) {
+                name.value = suggested = candidate;
+            }
+        });
+
+        // An import can take minutes; stop the user resubmitting while it runs
+        button.form.addEventListener('submit', function () {
+            if (url.value.trim() !== '' && (!$.fn.valid || $(button.form).valid())) {
+                button.disabled = true;
+                button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> @Html.Raw(HttpUtility.JavaScriptStringEncode(Resources.Repository_Create_Importing))';
+            }
+        });
+    })();
+</script>
 }

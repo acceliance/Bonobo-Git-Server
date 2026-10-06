@@ -411,6 +411,7 @@
     <Compile Include="Git\GitService\IGitService.cs" />
     <Compile Include="Git\GitService\ExecutionOptions.cs" />
     <Compile Include="Git\GitService\GitServiceExecutor.cs" />
+    <Compile Include="Git\RepositoryImporter.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Data\Update\Sqlite\AddAuditPushUser.cs" />

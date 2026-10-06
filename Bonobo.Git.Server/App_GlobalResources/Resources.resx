@@ -1053,4 +1053,34 @@ The regular C# string formatting rules apply: To get {} in your link you need to
   <data name="Validation_SshKey_Duplicate" xml:space="preserve">
     <value>This key is already in use.</value>
   </data>
+  <data name="Repository_Create_ImportUrl" xml:space="preserve">
+    <value>Import from URL</value>
+  </data>
+  <data name="Repository_Create_ImportUrlHint" xml:space="preserve">
+    <value>Optional. An http or https Git repository, for example on GitHub, whose branches and tags are copied into the new repository. Leave empty to create an empty repository.</value>
+  </data>
+  <data name="Repository_Create_ImportUrlInvalid" xml:space="preserve">
+    <value>The import URL must be an http:// or https:// address.</value>
+  </data>
+  <data name="Repository_Create_ImportUsername" xml:space="preserve">
+    <value>Import user name</value>
+  </data>
+  <data name="Repository_Create_ImportPassword" xml:space="preserve">
+    <value>Import password or token</value>
+  </data>
+  <data name="Repository_Create_ImportPasswordHint" xml:space="preserve">
+    <value>Only needed for private repositories. For GitHub, use a personal access token and leave the user name empty. These credentials are used once and are not stored.</value>
+  </data>
+  <data name="Repository_Create_ImportFailure" xml:space="preserve">
+    <value>The import failed: {0}</value>
+  </data>
+  <data name="Repository_Create_ImportTimeout" xml:space="preserve">
+    <value>The import was stopped because it took too long.</value>
+  </data>
+  <data name="Repository_Create_Importing" xml:space="preserve">
+    <value>Importing…</value>
+  </data>
+  <data name="Repository_Create_ImportAuthenticationFailure" xml:space="preserve">
+    <value>The remote repository could not be read. Check the URL; if the repository is private, enter a user name and a token that can read it.</value>
+  </data>
 </root>
