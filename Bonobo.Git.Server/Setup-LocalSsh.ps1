@@ -134,6 +134,36 @@ if ($sshdSvc) {
     }
 }
 
+if (-not (Get-Service sshd -ErrorAction SilentlyContinue)) {
+    $rebootPending = (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending') -or
+                     (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired')
+    if ($rebootPending) {
+        throw "The sshd service is not registered yet and a Windows restart is pending. Restart the machine, then run this script again."
+    }
+
+    # The binaries are there but nothing registered the service (seen when the Windows feature and
+    # a manual Win32-OpenSSH install have both been laid down). The manual install ships its own
+    # registration script, so use it to repair the service entries.
+    $manualDir = Join-Path $env:ProgramFiles 'OpenSSH'
+    if (Test-Path (Join-Path $manualDir 'install-sshd.ps1')) {
+        Write-Info "sshd binaries are present but the service is not registered; running install-sshd.ps1 from $manualDir..."
+        Push-Location $manualDir
+        try {
+            & (Join-Path $manualDir 'install-sshd.ps1')
+        } finally {
+            Pop-Location
+        }
+        if (-not (Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -ErrorAction SilentlyContinue)) {
+            New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' `
+                -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 | Out-Null
+        }
+    }
+
+    if (-not (Get-Service sshd -ErrorAction SilentlyContinue)) {
+        throw "The sshd service is still not registered. Check C:\Windows\Logs\CBS\CBS.log, or remove the Windows feature / C:\Program Files\OpenSSH and re-run."
+    }
+}
+
 Set-Service -Name sshd -StartupType Automatic
 if ((Get-Service sshd).Status -ne 'Running') { Start-Service sshd }
 Write-Info "sshd service: $((Get-Service sshd).Status)"
@@ -195,7 +225,8 @@ New-Item -ItemType Directory -Force -Path $SshKeysDir | Out-Null
 icacls $SshKeysDir /inheritance:r | Out-Null
 icacls $SshKeysDir /grant "${InvokingUser}:(OI)(CI)M" | Out-Null
 icacls $SshKeysDir /grant "${GitAccount}:(OI)(CI)RX" | Out-Null
-icacls $SshKeysDir /grant "SYSTEM:(OI)(CI)F" "Administrators:(OI)(CI)F" | Out-Null
+# Well-known SIDs (SYSTEM, BUILTIN\Administrators): the group names are localized.
+icacls $SshKeysDir /grant "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" | Out-Null
 Write-Info "ACL'd $SshKeysDir for $InvokingUser (write) and $GitAccount (read)."
 
 # ---------------------------------------------------------------------------
@@ -221,15 +252,19 @@ Write-Info "Granted traverse on parents, RX on bin\, Modify on App_Data\."
 
 # ---------------------------------------------------------------------------
 Write-Step "7. Patch web.config"
-[xml]$webConfigXml = Get-Content $WebConfigPath -Raw
-$appSettings = $webConfigXml.configuration.appSettings
+# PreserveWhitespace keeps the file's existing layout so the git diff stays minimal.
+$webConfigXml = New-Object System.Xml.XmlDocument
+$webConfigXml.PreserveWhitespace = $true
+$webConfigXml.Load($WebConfigPath)
+$appSettings = $webConfigXml.SelectSingleNode('/configuration/appSettings')
 function Set-AppSetting($node, $key, $value) {
-    $entry = $node.add | Where-Object { $_.key -eq $key }
-    if ($entry) { $entry.value = $value }
+    # SetAttribute, not '$entry.value =': PowerShell resolves .value to XmlNode.Value, not the attribute.
+    $entry = $node.SelectSingleNode("add[@key='$key']")
+    if ($entry) { $entry.SetAttribute('value', [string]$value) }
     else {
         $new = $node.OwnerDocument.CreateElement('add')
         $new.SetAttribute('key', $key)
-        $new.SetAttribute('value', $value)
+        $new.SetAttribute('value', [string]$value)
         $node.AppendChild($new) | Out-Null
     }
 }
@@ -243,15 +278,16 @@ Write-Info "SshServiceAccount     = $GitAccount"
 
 # ---------------------------------------------------------------------------
 Write-Step "8. Patch App_Data\config.xml"
-[xml]$appCfgXml = Get-Content $ConfigXmlPath -Raw
+$appCfgXml = New-Object System.Xml.XmlDocument
+$appCfgXml.PreserveWhitespace = $true
+$appCfgXml.Load($ConfigXmlPath)
 function Set-ConfigNode($doc, $name, $value) {
-    $node = $doc.Configuration.$name
+    $node = $doc.SelectSingleNode("/Configuration/$name")
     if ($null -eq $node) {
-        $new = $doc.CreateElement($name)
-        $doc.Configuration.AppendChild($new) | Out-Null
-        $node = $doc.Configuration.$name
+        $node = $doc.CreateElement($name)
+        $doc.DocumentElement.AppendChild($node) | Out-Null
     }
-    $node.InnerText = $value
+    $node.InnerText = [string]$value
 }
 Set-ConfigNode $appCfgXml 'Repositories' (Join-Path $AppData 'Repositories')
 Set-ConfigNode $appCfgXml 'SshEnabled' 'true'
@@ -288,7 +324,8 @@ if ($alreadyThere) {
         Write-Info "Appended block at end of file."
     }
     Copy-Item $SshdConfigPath "$SshdConfigPath.bak" -Force
-    Set-Content -Path $SshdConfigPath -Value $newLines -Encoding UTF8
+    # No BOM: Windows PowerShell 5.1's 'Set-Content -Encoding UTF8' adds one, which sshd can reject.
+    [IO.File]::WriteAllLines($SshdConfigPath, [string[]]$newLines, (New-Object System.Text.UTF8Encoding($false)))
     Write-Info "Backed up previous file to $SshdConfigPath.bak"
 }
 
