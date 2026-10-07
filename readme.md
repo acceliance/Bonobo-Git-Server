@@ -22,6 +22,8 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 [![Anonymous access](https://img.shields.io/badge/access-anonymous%20mode-success)](#)
 [![Reader profile](https://img.shields.io/badge/roles-reader%20profile-success)](#)
 [![SSH keys](https://img.shields.io/badge/access-SSH%20keys-success)](#)
+[![SSH setup script](https://img.shields.io/badge/setup-local%20SSH%20script-success)](#)
+[![Import from URL](https://img.shields.io/badge/repositories-import%20from%20URL-success)](#)
 [![Dependencies](https://img.shields.io/badge/NuGet-dependencies%20updated-success)](#)
 
 * **Mobile responsive UI** — layout and stylesheet reworked so the web frontend is usable on small screens.
@@ -29,7 +31,9 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 * **Markdown image rendering** — absolute and repository-relative image paths in `README.md` now resolve correctly in the Blob and repository views (URLs generated through the `RepositoryRaw` route, including the repository UUID).
 * **Anonymous access** — an anonymous browsing mode for repositories.
 * **Reader profile** — a read-only user profile.
-* **SSH keys** — users register SSH public keys on their account and clone over `git@server:repository.git`, the way GitHub works. Served by Windows OpenSSH with a forced command; see [SSH access](#ssh-access).
+* **SSH keys** — users register SSH public keys on their account (ed25519, RSA 2048+, ECDSA and FIDO security keys) and clone over `git@server:repository.git`, the way GitHub works. Each key shows its fingerprint, when it was added and when it was last used; repository pages offer an SSH clone URL beside the HTTP one. Served by Windows OpenSSH with a forced command; see [How to clone over SSH?](#how-to-clone-over-ssh) for users and [SSH access](#ssh-access) for the server setup.
+* **Local SSH setup script** — `Setup-LocalSsh.ps1`, shipped with the site, performs the whole SSH setup unattended on a development machine: OpenSSH Server, the `git` account, the shell deployment, ACLs, `web.config`, `config.xml` and `sshd_config`. See [Unattended local setup](#unattended-local-setup).
+* **Import from URL** — a new repository can be populated from an existing http(s) Git repository (GitHub, GitLab, Azure DevOps, ...) at creation time. All branches and tags are copied; see [How to import an existing repository?](#how-to-import-an-existing-repository-from-a-url).
 * **Updated dependencies** — NuGet packages refreshed to current versions, including the SQL provider dependency fix.
 
 
@@ -100,6 +104,43 @@ Frequently Asked Questions
 * Copy the value in the **Git Repository Location**.
     * It should look like `http://servername/projectname.git`.
 * Go to your command line and run `git clone http://servername/projectname.git`.
+
+#### How to clone over SSH?
+
+SSH cloning is available once an administrator has completed the [SSH access](#ssh-access) setup
+and ticked **Offer SSH clone URLs** in Global Settings. Then:
+
+* Generate a key pair on your machine if you don't have one: `ssh-keygen -t ed25519 -C "you@example.com"`.
+* Log in, open your **Account** page and click **SSH Keys**.
+    * Administrators can open any user's account and manage that user's keys the same way.
+* Give the key a name, paste the contents of your **public** key file (`~/.ssh/id_ed25519.pub`, one line) and add it.
+    * Accepted types: `ssh-ed25519`, `ssh-rsa` (2048 bits or more), `ecdsa-sha2-nistp256/384/521` and the FIDO `sk-` variants. DSA keys and private keys are refused.
+    * A key can belong to only one account; adding a key that is already registered elsewhere is rejected.
+    * The list shows each key's fingerprint, type and size, when it was added and when it was last used, with a delete button.
+* Go to the **Repository Detail** page and copy the value in the **SSH** location. It looks like `git@servername:projectname.git`.
+* Run `git clone git@servername:projectname.git`.
+
+Over SSH you get exactly the permissions your account already has: no separate SSH permission
+model, and no anonymous access. Adding or deleting a key takes effect immediately.
+
+#### How to import an existing repository from a URL?
+
+* Go to **Repositories -> Create**.
+* Fill in **Import from URL** with the `http://` or `https://` address of the source repository, for example `https://github.com/owner/project.git`.
+    * The last segment of the URL is offered as the repository **Name**; change it if you like.
+    * Other protocols (`git://`, `ssh://`, local paths) are not accepted.
+* For a private repository, fill in **Import user name** and **Import password or token**.
+    * For GitHub, leave the user name empty and put a personal access token in the password field.
+    * Credentials embedded in the URL (`https://user:token@host/...`) are accepted too.
+    * The credentials are used once for the import and are never stored.
+* Fill in the remaining fields as for an empty repository and click **Create**.
+
+What happens:
+
+* All branches and tags of the source are fetched into the new bare repository, like `git clone --mirror` without hosting-specific refs such as GitHub's `refs/pull/*`.
+* The default branch follows the source's `HEAD`, falling back to `main` then `master`.
+* The import is aborted after 30 minutes. On any failure the repository is removed again from disk and from the database, and the error is shown on the form so you can correct it and resubmit.
+* The import is a one-time copy, not a mirror that keeps syncing. The source stays registered as the `origin` remote of the bare repository, which lets an administrator re-fetch by hand on the server if needed.
 
 #### How do I change my password?
 
@@ -215,6 +256,37 @@ Bonobo rewrites that file whenever a key is added or removed, and once at every 
 Log in as an administrator, go to **Global Settings**, tick **Offer SSH clone URLs** and set the
 **SSH host name** clients should use. Set the port only if sshd is not on 22. Repository pages
 will then show an SSH clone URL beside the HTTP one.
+
+#### Unattended local setup
+
+For a **development machine** running the site straight from a source checkout (Visual Studio or
+IIS Express), `Setup-LocalSsh.ps1` does steps 1 to 6 for you. It ships in the web project folder
+and in the published output. Run it from an elevated PowerShell:
+
+    .\Setup-LocalSsh.ps1
+    .\Setup-LocalSsh.ps1 -RepoRoot 'D:\src\Bonobo-Git-Server' -GitAccount gitssh -SshHostName myhost
+
+It is idempotent and safe to re-run after a rebuild. It will:
+
+* install and start Windows OpenSSH Server, falling back to Microsoft's Win32-OpenSSH release
+  download when the Windows feature has no payload for the current build;
+* create the local `git` account (or the one given with `-GitAccount`);
+* build `Bonobo.Git.Server.SshShell` in Debug (skip with `-SkipBuild`) and copy it into the web
+  project's `bin\` with an `.exe.config` rewritten to absolute paths into the checkout's `App_Data`;
+* create `C:\ProgramData\Bonobo\ssh` for `authorized_keys` and set its ACL, and grant the `git`
+  account traverse/read rights on the checkout, `bin\` and `App_Data\`;
+* patch `web.config` (`SshAuthorizedKeysPath`, `SshShellPath`, `SshServiceAccount`) and
+  `App_Data\config.xml` (absolute `Repositories` path, `SshEnabled`, `SshHost`);
+* insert the `Match User git` block into `sshd_config`, keeping a `.bak` copy, validate it with
+  `sshd -t` and restart sshd.
+
+Afterwards restart the web app so it regenerates `authorized_keys`, add a key under
+**Account settings -> SSH Keys**, and test with `ssh -T git@localhost`: being refused with
+"This account is only for git access" means key authentication and the forced command both work.
+
+Review the script before running it: it creates a local Windows account, edits `sshd_config` and
+ACLs, and may download from GitHub. It is meant for local setups; a production server should
+follow the manual steps above, with the shell deployed outside the web root.
 
 #### Troubleshooting
 
