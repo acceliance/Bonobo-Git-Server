@@ -24,6 +24,7 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 [![SSH keys](https://img.shields.io/badge/access-SSH%20keys-success)](#)
 [![SSH setup script](https://img.shields.io/badge/setup-local%20SSH%20script-success)](#)
 [![Import from URL](https://img.shields.io/badge/repositories-import%20from%20URL-success)](#)
+[![Git LFS](https://img.shields.io/badge/storage-Git%20LFS-success)](#)
 [![Dependencies](https://img.shields.io/badge/NuGet-dependencies%20updated-success)](#)
 
 * **Mobile responsive UI** — layout and stylesheet reworked so the web frontend is usable on small screens.
@@ -34,6 +35,7 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 * **SSH keys** — users register SSH public keys on their account (ed25519, RSA 2048+, ECDSA and FIDO security keys) and clone over `git@server:repository.git`, the way GitHub works. Each key shows its fingerprint, when it was added and when it was last used; repository pages offer an SSH clone URL beside the HTTP one. Served by Windows OpenSSH with a forced command; see [How to clone over SSH?](#how-to-clone-over-ssh) for users and [SSH access](#ssh-access) for the server setup.
 * **Local SSH setup script** — `Setup-LocalSsh.ps1`, shipped with the site, performs the whole SSH setup unattended on a development machine: OpenSSH Server, the `git` account, the shell deployment, ACLs, `web.config`, `config.xml` and `sshd_config`. See [Unattended local setup](#unattended-local-setup).
 * **Import from URL** — a new repository can be populated from an existing http(s) Git repository (GitHub, GitLab, Azure DevOps, ...) at creation time. All branches and tags are copied; see [How to import an existing repository?](#how-to-import-an-existing-repository-from-a-url).
+* **Git LFS** — the server stores and serves large files for the `git-lfs` client (Batch API, "basic" transfer over HTTP/HTTPS), with the same sign-in and the same pull/push rights as git. Objects live inside each repository, are verified against their SHA-256 on upload, and follow the repository when it is backed up, renamed or deleted. File locking and the `tus` transfer are not implemented. See [How to store large files (Git LFS)?](#how-to-store-large-files-git-lfs).
 * **Updated dependencies** — NuGet packages refreshed to current versions, including the SQL provider dependency fix.
 
 
@@ -147,6 +149,27 @@ What happens:
 * Click on the **account settings** in the top right corner.
 * Enter new password and confirmation.
 * Save.
+
+#### How to store large files (Git LFS)?
+
+Bonobo is also a **Git LFS** server (Batch API, "basic" transfer over HTTP/HTTPS). Nothing to enable on the server side;
+on the client, install [git-lfs](https://git-lfs.com) and:
+
+```bash
+git lfs install
+git lfs track "*.tar"        # writes .gitattributes: commit it
+git add .gitattributes big.tar && git commit -m "add big.tar" && git push
+```
+
+The client finds the server by itself: for the remote `https://server/project.git` it uses `https://server/project.git/info/lfs`.
+
+* Same sign-in and same rights as git: **pull** access to download, **push** access to upload. Anonymous access follows the repository setting.
+* The objects are stored inside the bare repository, in `lfs/objects/ab/cd/<sha256>`, so they are backed up, renamed and deleted with it.
+  An upload is checked against its SHA-256 and written to `lfs/tmp` first: a broken upload never leaves a corrupt object.
+* Not implemented: the file locking API (`git lfs lock`) and the `tus` transfer; the client falls back to "basic" by itself.
+* **IIS settings** (already in `web.config`): `maxAllowedContentLength` is 4 GB (the IIS maximum) and `executionTimeout` is 2 hours,
+  and the WebDAV module is removed, because it answers the HTTP `PUT` of an upload with 405. A reverse proxy or load balancer in front
+  of IIS needs the same: no request size limit (or at least the size of your biggest file), and a long timeout.
 
 #### How to backup data?
 

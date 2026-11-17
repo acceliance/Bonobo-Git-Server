@@ -23,6 +23,28 @@ namespace Bonobo.Git.Server.App_Start
                             new { controller = "Git", action = "SecureReceivePack" },
                             new { method = new HttpMethodConstraint("POST") });
 
+            // Git LFS (Batch API + basic transfer). The client derives {repo}.git/info/lfs from the remote URL.
+            // "batch" and "verify" are not 64 hex characters, so they never match the {oid} routes.
+            routes.MapRoute("LfsBatch",
+                            "{repositoryName}.git/info/lfs/objects/batch",
+                            new { controller = "Lfs", action = "Batch" },
+                            new { method = new HttpMethodConstraint("POST") });
+
+            routes.MapRoute("LfsVerify",
+                            "{repositoryName}.git/info/lfs/objects/verify",
+                            new { controller = "Lfs", action = "Verify" },
+                            new { method = new HttpMethodConstraint("POST") });
+
+            routes.MapRoute("LfsUpload",
+                            "{repositoryName}.git/info/lfs/objects/{oid}",
+                            new { controller = "Lfs", action = "Upload" },
+                            new { oid = "[0-9a-f]{64}", method = new HttpMethodConstraint("PUT") });
+
+            routes.MapRoute("LfsDownload",
+                            "{repositoryName}.git/info/lfs/objects/{oid}",
+                            new { controller = "Lfs", action = "Download" },
+                            new { oid = "[0-9a-f]{64}", method = new HttpMethodConstraint("GET") });
+
             routes.MapRoute("GitBaseUrl",
                             "{repositoryName}.git",
                             new { controller = "Git", action = "GitUrl" },

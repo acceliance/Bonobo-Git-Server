@@ -481,6 +481,10 @@
     <Compile Include="Security\SshCommandParser.cs" />
     <Compile Include="Security\SshKeyParser.cs" />
     <Compile Include="Controllers\GitController.cs" />
+    <Compile Include="Controllers\LfsController.cs" />
+    <Compile Include="Git\Lfs\LfsBatchHandler.cs" />
+    <Compile Include="Git\Lfs\LfsModels.cs" />
+    <Compile Include="Git\Lfs\LfsObjectStore.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

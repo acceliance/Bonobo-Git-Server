@@ -305,6 +305,8 @@
     <Compile Include="Unit\DatabaseUpdateTestsSqlite.cs" />
     <Compile Include="Unit\DatabaseUpdateTestsSqlServer.cs" />
     <Compile Include="Unit\PathEncoderTest.cs" />
+    <Compile Include="Unit\LfsBatchHandlerTest.cs" />
+    <Compile Include="Unit\LfsObjectStoreTest.cs" />
     <Compile Include="Unit\SshKeyParserTest.cs" />
     <Compile Include="Unit\RepositoryImporterTest.cs" />
     <Compile Include="Unit\SshCommandParserTest.cs" />
