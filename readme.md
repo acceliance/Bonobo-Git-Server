@@ -33,7 +33,7 @@ This fork is maintained by [Acceliance](https://github.com/acceliance) and adds 
 * **Anonymous access** — an anonymous browsing mode for repositories.
 * **Reader profile** — a read-only user profile.
 * **SSH keys** — users register SSH public keys on their account (ed25519, RSA 2048+, ECDSA and FIDO security keys) and clone over `git@server:repository.git`, the way GitHub works. Each key shows its fingerprint, when it was added and when it was last used; repository pages offer an SSH clone URL beside the HTTP one. Served by Windows OpenSSH with a forced command; see [How to clone over SSH?](#how-to-clone-over-ssh) for users and [SSH access](#ssh-access) for the server setup.
-* **Local SSH setup script** — `Setup-LocalSsh.ps1`, shipped with the site, performs the whole SSH setup unattended on a development machine: OpenSSH Server, the `git` account, the shell deployment, ACLs, `web.config`, `config.xml` and `sshd_config`. See [Unattended local setup](#unattended-local-setup).
+* **SSH setup scripts** — `Setup-LocalSsh.ps1` performs the whole SSH setup unattended on a development machine running from a source checkout, and `Setup-PublishedSsh.ps1` does the same on a server for a published IIS site: OpenSSH Server, the `git` account, the shell deployment, ACLs, `web.config`, `config.xml` and `sshd_config`. Both ship with the site. See [Unattended setup](#unattended-setup).
 * **Import from URL** — a new repository can be populated from an existing http(s) Git repository (GitHub, GitLab, Azure DevOps, ...) at creation time. All branches and tags are copied; see [How to import an existing repository?](#how-to-import-an-existing-repository-from-a-url).
 * **Git LFS** — the server stores and serves large files for the `git-lfs` client (Batch API, "basic" transfer over HTTP/HTTPS), with the same sign-in and the same pull/push rights as git. Objects live inside each repository, are verified against their SHA-256 on upload, and follow the repository when it is backed up, renamed or deleted. File locking and the `tus` transfer are not implemented. See [How to store large files (Git LFS)?](#how-to-store-large-files-git-lfs).
 * **Updated dependencies** — NuGet packages refreshed to current versions, including the SQL provider dependency fix.
@@ -243,7 +243,8 @@ need to be an administrator, and it should not be the IIS application pool ident
 #### 3. Deploy the shell
 
 Copy the build output of `Bonobo.Git.Server.SshShell` to a folder outside the web root, for
-example `C:\ProgramData\Bonobo\ssh`. Then edit `Bonobo.Git.Server.SshShell.exe.config` so that
+example `C:\ProgramData\Bonobo\ssh`. The published site carries a copy of it in
+`App_Data\ssh-shell` when the solution was built before publishing. Then edit `Bonobo.Git.Server.SshShell.exe.config` so that
 the connection string and the `UserConfiguration`, `GitPath`, `GitHomePath` and `LogDirectory`
 settings point at the **same** installation the web site uses. They must all be absolute paths:
 the shell runs outside IIS, so there is no site root for a `~\App_Data\...` path to resolve
@@ -280,16 +281,58 @@ Log in as an administrator, go to **Global Settings**, tick **Offer SSH clone UR
 **SSH host name** clients should use. Set the port only if sshd is not on 22. Repository pages
 will then show an SSH clone URL beside the HTTP one.
 
-#### Unattended local setup
+#### Unattended setup
+
+Two scripts do steps 1 to 6 for you. Both ship at the root of the web project and of the
+published output, are idempotent, and must run from an elevated PowerShell. Windows Server's
+default execution policy refuses unsigned scripts, so start them with
+`powershell -ExecutionPolicy Bypass -File <script>` (or run `Unblock-File` on them once).
+
+##### On a published IIS site
+
+`Setup-PublishedSsh.ps1` is for a **server** where the site was published and runs under IIS.
+It works from the published folder, builds nothing, and takes the shell from `App_Data\ssh-shell`
+in the published output (pass `-ShellSource` to use a copy of `Bonobo.Git.Server.SshShell\bin\Release`
+from elsewhere). For a site published without that folder, `Deploy-SshShell.ps1` at the root of
+the checkout fills it from the build machine, over an administrative share or as a zip:
+
+    .\Deploy-SshShell.ps1 -Build -Destination '\\server\c$\inetpub\site\App_Data\ssh-shell'
+    .\Deploy-SshShell.ps1 -ZipPath "$env:USERPROFILE\Desktop\ssh-shell.zip"
+
+From the published folder:
+
+    powershell -ExecutionPolicy Bypass -File .\Setup-PublishedSsh.ps1 -SshHostName git.example.com
+    powershell -ExecutionPolicy Bypass -File .\Setup-PublishedSsh.ps1 -SiteRoot 'D:\sites\git' -ShellSource 'D:\drop\SshShell' -GitAccount gitssh
+
+It finds the IIS site whose physical path is the folder and reads its application pool identity
+(or takes `-AppPoolIdentity`), then it will:
+
+* install and start Windows OpenSSH Server, with the same fallback to Microsoft's Win32-OpenSSH
+  release as the local script;
+* create the local `git` account (or the one given with `-GitAccount`);
+* copy the shell to `C:\ProgramData\Bonobo\ssh-shell` (readable by `git`, not writable by the
+  application pool) and write its `.exe.config` from the site's `web.config`, with the
+  connection string and every path made absolute;
+* create `C:\ProgramData\Bonobo\ssh` for `authorized_keys`, writable by the application pool
+  identity and readable by `git`, and grant `git` traverse rights down to the site and Modify on
+  `App_Data`;
+* patch `App_Data\config.xml` (absolute `Repositories` path, `SshEnabled`, `SshHost`) and
+  `web.config` (`SshAuthorizedKeysPath`, `SshShellPath`, `SshServiceAccount`);
+* insert the `Match User git` block into `sshd_config`, keeping a `.bak` copy, validate it with
+  `sshd -t` and restart sshd;
+* recycle the application pool so the site regenerates `authorized_keys`.
+
+Re-run it after every publish, since a publish overwrites `web.config`.
+
+##### On a development machine
 
 For a **development machine** running the site straight from a source checkout (Visual Studio or
-IIS Express), `Setup-LocalSsh.ps1` does steps 1 to 6 for you. It ships in the web project folder
-and in the published output. Run it from an elevated PowerShell:
+IIS Express), use `Setup-LocalSsh.ps1` instead:
 
     .\Setup-LocalSsh.ps1
     .\Setup-LocalSsh.ps1 -RepoRoot 'D:\src\Bonobo-Git-Server' -GitAccount gitssh -SshHostName myhost
 
-It is idempotent and safe to re-run after a rebuild. It will:
+It is safe to re-run after a rebuild. It will:
 
 * install and start Windows OpenSSH Server, falling back to Microsoft's Win32-OpenSSH release
   download when the Windows feature has no payload for the current build;
@@ -307,9 +350,8 @@ Afterwards restart the web app so it regenerates `authorized_keys`, add a key un
 **Account settings -> SSH Keys**, and test with `ssh -T git@localhost`: being refused with
 "This account is only for git access" means key authentication and the forced command both work.
 
-Review the script before running it: it creates a local Windows account, edits `sshd_config` and
-ACLs, and may download from GitHub. It is meant for local setups; a production server should
-follow the manual steps above, with the shell deployed outside the web root.
+Review either script before running it: it creates a local Windows account, edits `sshd_config`
+and ACLs, and may download from GitHub.
 
 #### Troubleshooting
 

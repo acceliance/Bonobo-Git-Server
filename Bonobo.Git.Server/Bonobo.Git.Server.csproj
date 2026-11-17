@@ -663,6 +663,7 @@
     <Content Include="Scripts\MicrosoftMvcValidation.js" />
     <Content Include="Scripts\RepositoryGroupToggle.js" />
     <Content Include="Setup-LocalSsh.ps1" />
+    <Content Include="Setup-PublishedSsh.ps1" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -863,4 +864,21 @@ xcopy/s /y /d "$(SolutionDir)packages\LibGit2Sharp.0.21.0.176\lib\net40\NativeBi
   <Import Project="..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
   <Import Project="..\packages\EntityFramework.6.5.2\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.2\build\EntityFramework.targets')" />
   <Import Project="..\packages\Serilog.4.4.0\build\Serilog.targets" Condition="Exists('..\packages\Serilog.4.4.0\build\Serilog.targets')" />
+  <!-- Ship the SSH shell with the published site, under App_Data so IIS never serves it, for
+       Setup-PublishedSsh.ps1 to deploy outside the web root. The SshShell project references this
+       one, so it cannot be built from here: build the solution in the same configuration first. -->
+  <PropertyGroup>
+    <SshShellOutputDir>$(MSBuildThisFileDirectory)..\Bonobo.Git.Server.SshShell\bin\$(Configuration)\</SshShellOutputDir>
+    <CopyAllFilesToSingleFolderForPackageDependsOn>IncludeSshShellInPublish;$(CopyAllFilesToSingleFolderForPackageDependsOn)</CopyAllFilesToSingleFolderForPackageDependsOn>
+    <CopyAllFilesToSingleFolderForMsdeployDependsOn>IncludeSshShellInPublish;$(CopyAllFilesToSingleFolderForMsdeployDependsOn)</CopyAllFilesToSingleFolderForMsdeployDependsOn>
+  </PropertyGroup>
+  <Target Name="IncludeSshShellInPublish">
+    <Warning Condition="!Exists('$(SshShellOutputDir)Bonobo.Git.Server.SshShell.exe')" Text="Bonobo.Git.Server.SshShell has no $(Configuration) build output; the published site will not contain App_Data\ssh-shell. Build the solution first." />
+    <ItemGroup>
+      <_SshShellFiles Include="$(SshShellOutputDir)**\*" Exclude="$(SshShellOutputDir)**\*.vshost.*" />
+      <FilesForPackagingFromProject Include="@(_SshShellFiles)">
+        <DestinationRelativePath>App_Data\ssh-shell\%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+      </FilesForPackagingFromProject>
+    </ItemGroup>
+  </Target>
 </Project>
