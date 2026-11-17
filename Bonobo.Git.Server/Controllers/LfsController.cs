@@ -54,6 +54,7 @@ namespace Bonobo.Git.Server.Controllers
             string objectsUrl = Request.Url.GetLeftPart(UriPartial.Authority) + path.Substring(0, path.Length - "batch".Length);
 
             var response = LfsBatchHandler.Process(request, StoreOf(repositoryName), objectsUrl);
+            LfsBatchHandler.AddHeader(response, "Authorization", Request.Headers["Authorization"]);
             return Json(200, response);
         }
 

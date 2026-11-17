@@ -76,6 +76,34 @@ namespace Bonobo.Git.Server.Git.Lfs
             return response;
         }
 
+        /// <summary>
+        /// Asks the client to send this header with every object request. The git-lfs client does not reliably send its
+        /// credentials with the upload/download/verify requests (it got a 401 and gave up retrying), so the server hands
+        /// back the Authorization header it just received on the batch call. It goes back only to the caller who sent it.
+        /// </summary>
+        public static void AddHeader(LfsBatchResponse response, string name, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+            foreach (var obj in response.Objects)
+            {
+                if (obj.Actions == null)
+                {
+                    continue;
+                }
+                foreach (var action in obj.Actions.Values)
+                {
+                    if (action.Header == null)
+                    {
+                        action.Header = new Dictionary<string, string>();
+                    }
+                    action.Header[name] = value;
+                }
+            }
+        }
+
         /// <summary>Null when the request is acceptable, otherwise the message to send back with HTTP 422.</summary>
         public static string Validate(LfsBatchRequest request)
         {

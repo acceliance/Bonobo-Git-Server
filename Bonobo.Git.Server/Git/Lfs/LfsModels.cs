@@ -32,6 +32,10 @@ namespace Bonobo.Git.Server.Git.Lfs
     {
         [JsonProperty("href")]
         public string Href { get; set; }
+
+        /// <summary>Headers the client must send with this request (the Authorization header, see LfsBatchHandler.AddHeader).</summary>
+        [JsonProperty("header")]
+        public System.Collections.Generic.Dictionary<string, string> Header { get; set; }
     }
 
     public class LfsObjectError

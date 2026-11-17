@@ -126,6 +126,29 @@ namespace Bonobo.Git.Server.Test.Unit
         }
 
         [TestMethod]
+        public void AddHeader_PutsTheHeaderOnEveryAction_AndSkipsObjectsWithoutActions()
+        {
+            string known = Store("known");
+            var request = Request("upload", new string('a', 64), 1);
+            request.Objects.Add(new LfsObjectSpec { Oid = known, Size = "known".Length });
+            var response = LfsBatchHandler.Process(request, _store, ObjectsUrl);
+
+            LfsBatchHandler.AddHeader(response, "Authorization", "Basic abc");
+
+            Assert.AreEqual("Basic abc", response.Objects[0].Actions["upload"].Header["Authorization"]);
+            Assert.AreEqual("Basic abc", response.Objects[0].Actions["verify"].Header["Authorization"]);
+            Assert.IsNull(response.Objects[1].Actions);
+        }
+
+        [TestMethod]
+        public void AddHeader_WithoutAValue_ChangesNothing()
+        {
+            var response = LfsBatchHandler.Process(Request("upload", new string('a', 64), 1), _store, ObjectsUrl);
+            LfsBatchHandler.AddHeader(response, "Authorization", null);
+            Assert.IsNull(response.Objects[0].Actions["upload"].Header);
+        }
+
+        [TestMethod]
         public void Validate_AcceptsAWellFormedRequest()
         {
             Assert.IsNull(LfsBatchHandler.Validate(Request("upload", new string('a', 64), 1)));
