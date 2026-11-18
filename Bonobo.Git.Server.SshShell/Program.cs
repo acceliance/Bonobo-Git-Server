@@ -5,6 +5,10 @@ using Bonobo.Git.Server.Models;
 using Bonobo.Git.Server.Security;
 using Serilog;
 using System;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Collections;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -127,17 +131,8 @@ namespace Bonobo.Git.Server.SshShell
                 return ExitFailure;
             }
 
-            var info = new ProcessStartInfo(gitPath, service + " \"" + repositoryPath + "\"")
-            {
-                CreateNoWindow = true,
-                // The whole point: git inherits our stdin/stdout, which sshd has wired to the client.
-                // Redirecting them here would corrupt the pack protocol.
-                UseShellExecute = false,
-                RedirectStandardInput = false,
-                RedirectStandardOutput = false,
-                RedirectStandardError = false,
-                WorkingDirectory = Path.GetDirectoryName(repositoryPath) ?? Environment.CurrentDirectory,
-            };
+            // Only used to build the environment git runs with: starting git is done by hand below.
+            var info = new ProcessStartInfo(gitPath) { UseShellExecute = false };
 
             if (!String.IsNullOrEmpty(gitHomePath))
             {
@@ -146,11 +141,166 @@ namespace Bonobo.Git.Server.SshShell
 
             SetHookEnvironment(info, container, userId);
 
-            using (var process = Process.Start(info))
+            string commandLine = "\"" + gitPath + "\" " + service + " \"" + repositoryPath + "\"";
+            string workingDirectory = Path.GetDirectoryName(repositoryPath) ?? Environment.CurrentDirectory;
+
+            return RunWithInheritedStdio(gitPath, commandLine, workingDirectory, info.EnvironmentVariables);
+        }
+
+        /// <summary>
+        /// Starts git with OUR stdin, stdout and stderr - the pipes sshd wired to the client - as its own,
+        /// and waits for it. No bytes pass through this process, so the pack protocol cannot be
+        /// altered, stalled or reordered by it.
+        ///
+        /// Process.Start cannot do this: without redirection it does not hand the parent's standard
+        /// handles to the child, and sshd starts us without a console for git to inherit instead, so
+        /// git would see neither the client's input nor an output the client can read. Redirecting and
+        /// relaying the streams ourselves was tried, but a read pending on the client's input kept
+        /// later input (everything a real clone sends after the ref advertisement) from reaching
+        /// git. Passing the handles straight through with CreateProcess avoids both.
+        /// </summary>
+        private static int RunWithInheritedStdio(string exePath, string commandLine, string workingDirectory,
+            System.Collections.Specialized.StringDictionary environment)
+        {
+            IntPtr stdIn = NativeMethods.GetStdHandle(NativeMethods.StdInputHandle);
+            IntPtr stdOut = NativeMethods.GetStdHandle(NativeMethods.StdOutputHandle);
+            IntPtr stdErr = NativeMethods.GetStdHandle(NativeMethods.StdErrorHandle);
+
+            // The child can only use a handle that is marked inheritable.
+            foreach (IntPtr handle in new[] { stdIn, stdOut, stdErr })
             {
-                process.WaitForExit();
-                return process.ExitCode;
+                if (IsUsableHandle(handle))
+                {
+                    NativeMethods.SetHandleInformation(handle, NativeMethods.HandleFlagInherit, NativeMethods.HandleFlagInherit);
+                }
             }
+
+            // A Unicode environment block: NAME=value pairs, each ending in a NUL, then one more NUL.
+            var names = new List<string>();
+            foreach (DictionaryEntry entry in environment) names.Add((string)entry.Key);
+            names.Sort(StringComparer.OrdinalIgnoreCase);
+            var block = new StringBuilder();
+            foreach (string name in names)
+            {
+                block.Append(name).Append('=').Append(environment[name]).Append('\0');
+            }
+            block.Append('\0');
+
+            var startup = new NativeMethods.StartupInfo
+            {
+                cb = Marshal.SizeOf(typeof(NativeMethods.StartupInfo)),
+                dwFlags = NativeMethods.StartfUseStdHandles,
+                hStdInput = IsUsableHandle(stdIn) ? stdIn : IntPtr.Zero,
+                hStdOutput = IsUsableHandle(stdOut) ? stdOut : IntPtr.Zero,
+                hStdError = IsUsableHandle(stdErr) ? stdErr : IntPtr.Zero,
+            };
+
+            IntPtr environmentBlock = Marshal.StringToHGlobalUni(block.ToString());
+            try
+            {
+                NativeMethods.ProcessInformation process;
+                bool started = NativeMethods.CreateProcess(
+                    exePath,
+                    new StringBuilder(commandLine),
+                    IntPtr.Zero,
+                    IntPtr.Zero,
+                    true, // inherit the handles marked above
+                    NativeMethods.CreateUnicodeEnvironment | NativeMethods.CreateNoWindow,
+                    environmentBlock,
+                    workingDirectory,
+                    ref startup,
+                    out process);
+
+                if (!started)
+                {
+                    throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "Could not start git.");
+                }
+
+                try
+                {
+                    NativeMethods.WaitForSingleObject(process.hProcess, NativeMethods.Infinite);
+
+                    uint exitCode;
+                    if (!NativeMethods.GetExitCodeProcess(process.hProcess, out exitCode))
+                    {
+                        throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                    }
+                    return unchecked((int)exitCode);
+                }
+                finally
+                {
+                    NativeMethods.CloseHandle(process.hThread);
+                    NativeMethods.CloseHandle(process.hProcess);
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(environmentBlock);
+            }
+        }
+
+        private static bool IsUsableHandle(IntPtr handle)
+        {
+            return handle != IntPtr.Zero && handle != new IntPtr(-1);
+        }
+
+        private static class NativeMethods
+        {
+            public const int StdInputHandle = -10;
+            public const int StdOutputHandle = -11;
+            public const int StdErrorHandle = -12;
+            public const uint HandleFlagInherit = 0x00000001;
+            public const int StartfUseStdHandles = 0x00000100;
+            public const uint CreateUnicodeEnvironment = 0x00000400;
+            public const uint CreateNoWindow = 0x08000000;
+            public const uint Infinite = 0xFFFFFFFF;
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            public struct StartupInfo
+            {
+                public int cb;
+                public string lpReserved;
+                public string lpDesktop;
+                public string lpTitle;
+                public int dwX, dwY, dwXSize, dwYSize, dwXCountChars, dwYCountChars, dwFillAttribute;
+                public int dwFlags;
+                public short wShowWindow, cbReserved2;
+                public IntPtr lpReserved2;
+                public IntPtr hStdInput, hStdOutput, hStdError;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct ProcessInformation
+            {
+                public IntPtr hProcess, hThread;
+                public int dwProcessId, dwThreadId;
+            }
+
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr GetStdHandle(int nStdHandle);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool SetHandleInformation(IntPtr hObject, uint dwMask, uint dwFlags);
+
+            [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool CreateProcess(string lpApplicationName, StringBuilder lpCommandLine,
+                IntPtr lpProcessAttributes, IntPtr lpThreadAttributes,
+                [MarshalAs(UnmanagedType.Bool)] bool bInheritHandles, uint dwCreationFlags,
+                IntPtr lpEnvironment, string lpCurrentDirectory,
+                ref StartupInfo lpStartupInfo, out ProcessInformation lpProcessInformation);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool CloseHandle(IntPtr hObject);
         }
 
         /// <summary>

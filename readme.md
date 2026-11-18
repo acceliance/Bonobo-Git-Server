@@ -324,6 +324,31 @@ It finds the IIS site whose physical path is the folder and reads its applicatio
 
 Re-run it after every publish, since a publish overwrites `web.config`.
 
+##### Building the shell here and installing it on the server
+
+`Publish-SshShell.ps1`, at the root of the checkout, is for a server that has no build tools and was
+already set up once with `Setup-PublishedSsh.ps1`. It runs on the **build machine** and does the
+whole round trip over the SSH access you already have to the server (it needs `ssh.exe` and
+`scp.exe` locally, and a login on the server that is an administrator):
+
+    .\Publish-SshShell.ps1 -Server administrator@server.example.com -SiteRoot 'C:\inetpub\git.example.com' -SshHostName git.example.com
+
+* `-Server` is the SSH target, `-SiteRoot` the published site's folder **on the server** (it holds
+  `Setup-PublishedSsh.ps1`), and `-SshHostName` the name clients clone from.
+* It builds `Bonobo.Git.Server.SshShell` in Release (through `Deploy-SshShell.ps1`; `-SkipBuild`
+  reuses the existing output), copies the package to a temporary folder in `C:\Windows\Temp` on the
+  server, and runs `Setup-PublishedSsh.ps1` there with that build as `-ShellSource`.
+* So the shell ends up in `C:\ProgramData\Bonobo\ssh-shell` with a freshly written `.exe.config`,
+  the ACLs are re-applied, sshd is restarted and the application pool recycled, exactly as in the
+  previous section. The temporary folders on both machines are removed afterwards.
+* A running shell locks its exe, so the copy fails while someone is cloning, fetching or pushing.
+  Pass **`-StopRunning`** to stop the shell processes running from `C:\ProgramData\Bonobo` first;
+  that ends any transfer in progress, so use it when nobody is working. `-GitAccount` is passed on
+  to the setup script if the account is not `git`.
+
+Afterwards open the site once, so it regenerates `authorized_keys`, and test with
+`ssh -o IdentitiesOnly=yes -T git@git.example.com`.
+
 ##### On a development machine
 
 For a **development machine** running the site straight from a source checkout (Visual Studio or
@@ -364,6 +389,25 @@ and ACLs, and may download from GitHub.
 * **Everything is refused with "This account is only for git access"** means sshd is invoking the
   shell without the key id argument, i.e. it is not using the generated `authorized_keys`. Check
   the `AuthorizedKeysFile` path and that `StrictModes` is not rejecting the file.
+* **`Permission denied (publickey)` although the key is registered, and the OpenSSH log
+  (Event Viewer > Applications and Services Logs > OpenSSH > Operational) says `Authentication
+  refused`**: with `StrictModes` on, sshd also checks who *owns* `authorized_keys`, and the file
+  Bonobo writes is owned by the application pool identity, which sshd does not accept. Either set
+  `StrictModes no` in `sshd_config` (global; password login is off and administrators use their own
+  keys file), or make Administrators the owner (`takeown /a /f <file>`), knowing Bonobo's next
+  rewrite of the file resets the owner.
+* **The key is accepted but the connection is closed with an error pointing at the quoted
+  `Bonobo.Git.Server.SshShell.exe` path** (a PowerShell "unexpected token" message): sshd runs the
+  forced command through the server's default SSH shell, and PowerShell cannot parse a quoted path
+  followed by an argument. Switch the default shell to cmd and restart sshd (this also changes the
+  shell of your own administrator SSH sessions):
+
+        New-ItemProperty -Path 'HKLM:\SOFTWARE\OpenSSH' -Name DefaultShell -Value 'C:\Windows\System32\cmd.exe' -PropertyType String -Force
+        Restart-Service sshd
+
+* **`Publish-SshShell.ps1` or `Setup-PublishedSsh.ps1` fails with "being used by another process"**:
+  a shell is still running from `C:\ProgramData\Bonobo\ssh-shell`. Wait for the transfer to end, or
+  use `Publish-SshShell.ps1 -StopRunning`.
 * Bonobo's own view of what happened is in `App_Data\Logs\ssh-*.txt`, written by the shell, and
   `App_Data\Logs\log-*.txt` for the file generation.
 * Only `git-upload-pack`, `git-receive-pack` and `git-upload-archive` are accepted. An interactive
